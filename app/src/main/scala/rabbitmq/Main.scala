@@ -3,15 +3,18 @@ package rabbitmq
 import cats.data.Kleisli
 import cats.effect._
 import cats.implicits._
+import dev.profunktor.fs2rabbit.config.Fs2RabbitConfig
 import dev.profunktor.fs2rabbit.config.declaration.DeclarationQueueConfig
 import dev.profunktor.fs2rabbit.interpreter.RabbitClient
 import dev.profunktor.fs2rabbit.json.Fs2JsonEncoder
 import dev.profunktor.fs2rabbit.model.AckResult.Ack
 import dev.profunktor.fs2rabbit.model.AmqpFieldValue.{LongVal, StringVal}
 import dev.profunktor.fs2rabbit.model._
+import dev.profunktor.fs2rabbit.resiliency.ResilientStream
 import fs2.{Pipe, Stream}
 
 import java.nio.charset.StandardCharsets.UTF_8
+import scala.concurrent.duration._
 
 class AutoAckFlow[F[_]: Async, A](
     consumer: Stream[F, AmqpEnvelope[A]],
@@ -74,4 +77,28 @@ class AutoAckConsumerDemo[F[_]: Async](R: RabbitClient[F]) {
       ).flow.compile.drain
     } yield ()
   }
+}
+
+object MonixAutoAckConsumer extends IOApp {
+
+  private val config: Fs2RabbitConfig = Fs2RabbitConfig(
+    host = "localhost",
+    port = 5672,
+    virtualHost = "/",
+    connectionTimeout = 3.minutes,
+    ssl = false,
+    username = Some("guest"),
+    password = Some("guest"),
+    requeueOnNack = false,
+    requeueOnReject = false,
+    internalQueueSize = Some(500),
+  )
+
+  override def run(args: List[String]): IO[ExitCode] =
+    RabbitClient.default[IO](config).resource.use { client =>
+      ResilientStream
+        .runF(new AutoAckConsumerDemo[IO](client).program)
+        .as(ExitCode.Success)
+    }
+
 }
