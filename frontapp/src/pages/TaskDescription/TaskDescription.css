@@ -1,0 +1,12 @@
+.exampleContainer {
+    display: flex;
+}
+
+.exampleEntryCardWrapper {
+    width: calc(50% - 2em);
+}
+
+.inputWrapper {
+    margin: 0 20px 0 0;
+}
+
