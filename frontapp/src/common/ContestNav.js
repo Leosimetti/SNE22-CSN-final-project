@@ -1,13 +1,15 @@
 import Button from "@mui/material/Button";
 import ButtonGroup from "@mui/material/ButtonGroup";
-import { useEffect } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom";
+import URLs from "./URLs";
+import { useLocation } from "react-router-dom";
 
 export default function ContestNav({ current }) {
   const navigate = useNavigate();
+  const currentLocation = useLocation();
 
-  function onClick() {
-    navigate("/tasks")
+  function goTo(link) {
+    navigate(link);
   }
 
   return (
@@ -17,11 +19,15 @@ export default function ContestNav({ current }) {
       size="large"
       color="warning"
     >
-      <Button disabled={current === "tasks"} onClick={() => onClick()}>
+      <Button disabled={currentLocation.pathname === URLs.tasks} onClick={() => goTo(URLs.tasks)}>
         Tasks
       </Button>
-      <Button disabled={current === "sumbit"}> Submit solution</Button>
-      <Button disabled={current === "submissions"}> My submissions</Button>
+      <Button disabled={currentLocation.pathname === URLs.taskSubmit} onClick={() => goTo(URLs.taskSubmit)}>
+        Submit solution
+      </Button>
+      <Button disabled={currentLocation.pathname === URLs.personalSubmissions} onClick={() => goTo(URLs.personalSubmissions)}>
+        My submissions
+      </Button>
     </ButtonGroup>
   );
 }

@@ -1,16 +1,10 @@
-import {
-  Grommet,
-  Box,
-  Grid,
-  Header,
-  Heading,
-  Page,
-  PageContent,
-} from "grommet";
+import { Grommet, Header, Heading, Page, PageContent } from "grommet";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import Home from "./pages/Home/Home";
 import TaskDescription from "./pages/TaskDescription/TaskDescription";
 import Tasks from "./pages/Tasks/Tasks";
+import URLs from "./common/URLs";
+import TaskSubmit from "./pages/TaskSubmit/TaskSubmit";
 
 const theme = {
   global: {
@@ -33,7 +27,7 @@ function App() {
     <Grommet theme={theme}>
       <Router>
         <Page fill background="blackBorder">
-          <PageContent background="white" style={{padding: "0"}}>
+          <PageContent background="white" style={{ padding: "0" }}>
             <div style={{ "min-height": "100vh" }}>
               <Header background={"brand"}>
                 <Link to="/">
@@ -42,11 +36,15 @@ function App() {
                   </Heading>
                 </Link>
               </Header>
-              <div style={{margin: "20px"}}>
+              <div style={{ margin: "20px" }}>
                 <Routes>
-                  <Route path="/task" element={<TaskDescription />} />
-                  <Route path="/tasks" element={<Tasks />} />
-                  <Route path="/" element={<Home />} />
+                  <Route
+                    path={URLs.taskDescription}
+                    element={<TaskDescription />}
+                  />
+                  <Route path={URLs.tasks} element={<Tasks />} />
+                  <Route path={URLs.home} element={<Home />} />
+                  <Route path={URLs.taskSubmit} element={<TaskSubmit />} />
                 </Routes>
               </div>
             </div>

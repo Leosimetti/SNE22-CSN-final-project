@@ -3,8 +3,7 @@ import {
   Paragraph,
   Card,
   CardHeader,
-  CardBody,
-  Markdown,
+  CardBody
 } from "grommet";
 import ContestNav from "../../common/ContestNav";
 import "./TaskDescription.css";
