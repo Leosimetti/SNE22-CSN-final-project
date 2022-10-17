@@ -36,6 +36,7 @@ class AutoAckFlow[F[_]: Async, A](
       "Hey!",
       AmqpProperties(headers = Map("demoId" -> LongVal(123), "app" -> StringVal("fs2RabbitDemo"))),
     )
+
   val classMessage: AmqpMessage[Person] = AmqpMessage(
     Person(1L, "Sherlock", Address(212, "Baker St")),
     AmqpProperties.empty,
@@ -67,19 +68,14 @@ class AutoAckConsumerDemo[F[_]: Async](R: RabbitClient[F]) {
       _ <- R.declareQueue(DeclarationQueueConfig.default(queueName))
       _ <- R.declareExchange(exchangeName, ExchangeType.Topic)
       _ <- R.bindQueue(queueName, exchangeName, routingKey)
-      publisher <- R
-        .createPublisher[AmqpMessage[String]](exchangeName, routingKey)
+      publisher <- R.createPublisher[AmqpMessage[String]](exchangeName, routingKey)
       consumer <- R.createAutoAckConsumer[String](queueName)
-      _ <- new AutoAckFlow[F, String](
-        consumer,
-        logPipe,
-        publisher,
-      ).flow.compile.drain
+      _ <- new AutoAckFlow[F, String](consumer, logPipe, publisher).flow.compile.drain
     } yield ()
   }
 }
 
-object MonixAutoAckConsumer extends IOApp {
+object AutoAckConsumerDemo extends IOApp {
 
   private val config: Fs2RabbitConfig = Fs2RabbitConfig(
     host = "localhost",

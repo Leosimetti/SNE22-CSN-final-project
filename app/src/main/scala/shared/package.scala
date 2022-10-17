@@ -1,18 +1,19 @@
 package shared
 
-import io.circe.Decoder
+import io.circe.generic.semiauto.deriveDecoder
+import io.circe.{Decoder, Encoder}
+import org.latestbit.circe.adt.codec._
 
 import scala.concurrent.duration.Duration
-import io.circe.generic.semiauto.deriveDecoder
-import org.latestbit.circe.adt.codec._
 
 object types {
   type UserId = String
   type ProblemId = String
   type ExecutionTimeThreshold = Double
+  type SubmissionId = String
 }
 
-import types._
+import shared.types._
 
 sealed trait Language
 
@@ -20,15 +21,17 @@ object Language {
   case object Python extends Language
 
   implicit val decoder: Decoder[Language] = JsonTaggedAdtCodec.createPureEnumDecoder[Language]()
+  implicit val encoder: Encoder[Language] = JsonTaggedAdtCodec.createPureEnumEncoder[Language]()
+
 }
 
 case class ReferenceSolution(code: String, language: Language)
 object ReferenceSolution {
   implicit val decoder: Decoder[ReferenceSolution] = deriveDecoder
 }
-case class UserSolution(userId: UserId, code: String, language: Language)
-object UserSolution {
-  implicit val decoder: Decoder[UserSolution] = deriveDecoder
+case class UserSubmission(submissionId: SubmissionId, userId: UserId, code: String, language: Language)
+object UserSubmission {
+  implicit val decoder: Decoder[UserSubmission] = deriveDecoder
 }
 
 case class Problem(
@@ -43,29 +46,25 @@ object Problem {
 
 case class Task(
     problem: Problem,
-    userSolution: UserSolution,
+    userSolution: UserSubmission,
 )
 object Task {
   implicit val decoder: Decoder[Task] = deriveDecoder
 }
 
 sealed trait Result {
-  val userId: UserId
-  val problemId: ProblemId
+  val submissionId: SubmissionId
 }
 
 object Result {
-
   case class Success(
       duration: Duration,
-      override val userId: UserId,
-      override val problemId: ProblemId,
+      override val submissionId: SubmissionId,
   ) extends Result
 
   case class Failure(
       duration: Duration,
-      override val userId: UserId,
-      override val problemId: ProblemId,
+      override val submissionId: SubmissionId,
   ) extends Result
 
   // WrongAnswer
