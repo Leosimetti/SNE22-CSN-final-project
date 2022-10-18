@@ -6,7 +6,7 @@ const URLs = {
   home: "/",
 };
 
-const APPLICATION_SERVER = "http://172.29.104.5/8080";
+const APPLICATION_SERVER = "http://172.29.104.5:1488/submit";
 
 export { APPLICATION_SERVER };
 export default URLs;
