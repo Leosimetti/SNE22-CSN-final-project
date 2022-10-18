@@ -100,4 +100,14 @@ object ResultFrontendView {
   final case class Success(code: String, language: Language, duration: ExecutionTimeRatio) extends ResultFrontendView
   final case class Failure(code: String, language: Language, duration: Option[ExecutionTimeRatio])
       extends ResultFrontendView
+
+  implicit val encoderSuccess: Encoder.AsObject[Success] = deriveEncoder
+  implicit val decoderSuccess: Decoder[Success] = deriveDecoder
+
+  implicit val encoderFailure: Encoder.AsObject[Failure] = deriveEncoder
+  implicit val decoderFailure: Decoder[Failure] = deriveDecoder
+
+  implicit val schema: Schema[ResultFrontendView] = Schema.derived
+  implicit val encoder: Encoder[ResultFrontendView] = JsonTaggedAdtCodec.createEncoder("type")
+  implicit val decoder: Decoder[ResultFrontendView] = JsonTaggedAdtCodec.createDecoder("type")
 }
