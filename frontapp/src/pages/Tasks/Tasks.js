@@ -1,7 +1,8 @@
 import { Heading } from "grommet";
 import { Link } from "react-router-dom";
-import ContestTaskTable from "./ContestTasksTable";
+
 import ContestNav from "../../common/ContestNav";
+import ContestTaskTable from "./ContestTasksTable";
 
 function createData(name, status, solved, action) {
   return { name, status, solved, action };
@@ -24,7 +25,7 @@ const rows = [
 export default function Tasks() {
   return (
     <>
-    <ContestNav current="tasks"/>
+      <ContestNav current="tasks" />
       <Heading>Contest tasks:</Heading>
       <ContestTaskTable rows={rows} />
     </>

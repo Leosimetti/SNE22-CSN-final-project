@@ -1,12 +1,14 @@
-import { Heading } from "grommet";
-import ContestNav from "../../common/ContestNav";
-import { useRef, useState } from "react";
-import { Select } from "grommet";
 import "./TaskSubmit.css";
-import { Paragraph } from "grommet";
+
 import CodeEditor from "@uiw/react-textarea-code-editor";
+import { Heading } from "grommet";
+import { Select } from "grommet";
+import { Paragraph } from "grommet";
 import { Button } from "grommet";
 import { Form } from "grommet";
+import { useRef, useState } from "react";
+
+import ContestNav from "../../common/ContestNav";
 import { APPLICATION_SERVER } from "../../common/URLs";
 
 function toTitleCase(str) {
@@ -43,15 +45,15 @@ export default function TaskSubmit() {
 
     const response = await fetch(APPLICATION_SERVER, {
       method: "POST",
-      mode: "no-cors",
+      mode: "no-cors", //TODO: CORS
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(data),
-    }).catch((err) => console.log(err))
-    const responseJSON = await response.text()
-    
-    console.log(responseJSON)
+    }).catch((err) => console.log(err));
+    const responseJSON = await response.text();
+
+    console.log(responseJSON);
   }
 
   return (

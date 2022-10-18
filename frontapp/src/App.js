@@ -1,9 +1,10 @@
 import { Grommet, Header, Heading, Page, PageContent } from "grommet";
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import { BrowserRouter as Router, Link,Route, Routes } from "react-router-dom";
+
+import URLs from "./common/URLs";
 import Home from "./pages/Home/Home";
 import TaskDescription from "./pages/TaskDescription/TaskDescription";
 import Tasks from "./pages/Tasks/Tasks";
-import URLs from "./common/URLs";
 import TaskSubmit from "./pages/TaskSubmit/TaskSubmit";
 
 const theme = {

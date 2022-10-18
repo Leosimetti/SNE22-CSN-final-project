@@ -1,8 +1,9 @@
 import Button from "@mui/material/Button";
 import ButtonGroup from "@mui/material/ButtonGroup";
 import { useNavigate } from "react-router-dom";
-import URLs from "./URLs";
 import { useLocation } from "react-router-dom";
+
+import URLs from "./URLs";
 
 export default function ContestNav() {
   const navigate = useNavigate();

@@ -1,18 +1,19 @@
-import {
-  Heading,
-  Paragraph,
-  Card,
-  CardHeader,
-  CardBody
-} from "grommet";
-import ContestNav from "../../common/ContestNav";
 import "./TaskDescription.css";
+
+import {
+  Card,
+  CardBody,
+  CardHeader,
+  Heading,
+  Paragraph} from "grommet";
+
+import ContestNav from "../../common/ContestNav";
 
 export default function TaskDescription() {
   return (
     <>
       <ContestNav />
-      <Heading style={{"line-height": "20px"}}>Taskname</Heading>
+      <Heading style={{lineHeight: "20px"}}>Taskname</Heading>
       <Paragraph responsive style={{ maxWidth: "100%" }} size="xlarge">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
         tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
