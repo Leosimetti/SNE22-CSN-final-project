@@ -2,3 +2,4 @@
 .idea/
 .bsp/
 project/project/**
+.docker
