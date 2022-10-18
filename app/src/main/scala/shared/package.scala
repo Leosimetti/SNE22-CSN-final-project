@@ -1,5 +1,10 @@
 package shared
 
+import cats.effect.Sync
+import cats.syntax.all._
+import fs2.Stream
+import fs2.kafka.Deserializer
+import io.circe
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder}
 import org.latestbit.circe.adt.codec._
@@ -77,6 +82,25 @@ object ResultKafkaView {
       override val submission: UserSubmission,
   ) extends ResultKafkaView
 
+  implicit val encoderSuccess: Encoder.AsObject[Success] = deriveEncoder
+  implicit val decoderSuccess: Decoder[Success] = deriveDecoder
+
+  implicit val encoderFailure: Encoder.AsObject[Failure] = deriveEncoder
+  implicit val decoderFailure: Decoder[Failure] = deriveDecoder
+
+  implicit val schema: Schema[ResultFrontendView] = Schema.derived
+  implicit val encoder: Encoder[ResultKafkaView] = JsonTaggedAdtCodec.createEncoder("type")
+  implicit val decoder: Decoder[ResultKafkaView] = JsonTaggedAdtCodec.createDecoder("type")
+
+  implicit def deserializer[F[_]](implicit F: Sync[F]): Deserializer[F, ResultKafkaView] = Deserializer.instance {
+    case (_, _, data) =>
+      val string = Stream.emits(data).through(fs2.text.utf8.decode).compile.string
+      for {
+        json <- F.fromEither(circe.parser.parse(string))
+        decoded <- F.fromEither(decoder.decodeJson(json))
+      } yield decoded
+  }
+
 //  final case class WrongAnswer(...)
 //  final case class CompilationError(...)
 //  final case class TimeoutError(...)
@@ -85,9 +109,9 @@ object ResultKafkaView {
   implicit class ToFrontendViewOps(kafkaView: ResultKafkaView) {
     def toFrontendView: ResultFrontendView = kafkaView match {
       case Success(duration, submission) =>
-        ResultFrontendView.Success(submission.solution.code, submission.solution.language, duration)
+        ResultFrontendView.Success(Solution(submission.solution.code, submission.solution.language), duration)
       case Failure(duration, submission) =>
-        ResultFrontendView.Failure(submission.solution.code, submission.solution.language, duration)
+        ResultFrontendView.Failure(Solution(submission.solution.code, submission.solution.language), duration)
     }
   }
 
@@ -97,9 +121,8 @@ object ResultKafkaView {
   */
 sealed trait ResultFrontendView
 object ResultFrontendView {
-  final case class Success(code: String, language: Language, duration: ExecutionTimeRatio) extends ResultFrontendView
-  final case class Failure(code: String, language: Language, duration: Option[ExecutionTimeRatio])
-      extends ResultFrontendView
+  final case class Success(solution: Solution, duration: ExecutionTimeRatio) extends ResultFrontendView
+  final case class Failure(solution: Solution, duration: Option[ExecutionTimeRatio]) extends ResultFrontendView
 
   implicit val encoderSuccess: Encoder.AsObject[Success] = deriveEncoder
   implicit val decoderSuccess: Decoder[Success] = deriveDecoder
@@ -110,4 +133,5 @@ object ResultFrontendView {
   implicit val schema: Schema[ResultFrontendView] = Schema.derived
   implicit val encoder: Encoder[ResultFrontendView] = JsonTaggedAdtCodec.createEncoder("type")
   implicit val decoder: Decoder[ResultFrontendView] = JsonTaggedAdtCodec.createDecoder("type")
+
 }
