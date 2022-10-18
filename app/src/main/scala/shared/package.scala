@@ -10,7 +10,6 @@ object types {
   type UserId = String
   type ProblemId = String
   type ExecutionTimeThreshold = Double
-  type SubmissionId = String
 }
 
 import shared.types._
@@ -25,16 +24,16 @@ object Language {
 
 }
 
-case class ReferenceSolution(code: String, language: Language)
+final case class ReferenceSolution(code: String, language: Language)
 object ReferenceSolution {
   implicit val decoder: Decoder[ReferenceSolution] = deriveDecoder
 }
-case class UserSubmission(submissionId: SubmissionId, userId: UserId, code: String, language: Language)
+final case class UserSubmission(problemId: ProblemId, userId: UserId, code: String, language: Language)
 object UserSubmission {
   implicit val decoder: Decoder[UserSubmission] = deriveDecoder
 }
 
-case class Problem(
+final case class Problem(
     problemId: ProblemId,
     testInputs: List[String],
     referenceSolutions: List[ReferenceSolution],
@@ -44,7 +43,7 @@ object Problem {
   implicit val decoder: Decoder[Problem] = deriveDecoder
 }
 
-case class Task(
+final case class Task(
     problem: Problem,
     userSolution: UserSubmission,
 )
@@ -52,40 +51,45 @@ object Task {
   implicit val decoder: Decoder[Task] = deriveDecoder
 }
 
-sealed trait Result {
-  val submissionId: SubmissionId
+sealed trait ResultKafkaView {
+  val submission: UserSubmission
 }
 
-object Result {
-  case class Success(
+/** This is the result of the checking that will be stored in Kafka. For now we store the entire user submission along
+  * with the solution because we can not get them elsewhere.
+  */
+object ResultKafkaView {
+  final case class Success(
       duration: Duration,
-      override val submissionId: SubmissionId,
-  ) extends Result
+      override val submission: UserSubmission,
+  ) extends ResultKafkaView
 
-  case class Failure(
-      duration: Duration,
-      override val submissionId: SubmissionId,
-  ) extends Result
+  /** For some failure cases the duration may not be available: Ideally this should be split into cases where the
+    * duration is relevant, and the cases where the duration is irrelevant.
+    */
+  final case class Failure(
+      duration: Option[Duration],
+      override val submission: UserSubmission,
+  ) extends ResultKafkaView
 
-  // WrongAnswer
+//  final case class WrongAnswer(...)
+//  final case class CompilationError(...)
+//  final case class TimeoutError(...)
+//  final case class RuntimeError(...)
 
-//  case class CompilationError(
-//      msg: String,
-//      override val userId: UserId,
-//      override val problemId: ProblemId,
-//  ) extends Result
-//
-//  case class TimeoutError(
-//      duration: Duration,
-//      override val userId: UserId,
-//      override val problemId: ProblemId,
-//  ) extends Result
-//
-//  case class RuntimeError(
-//      msg: String,
-//      duration: Duration,
-//      exitCode: Int,
-//      override val userId: UserId,
-//      override val problemId: ProblemId,
-//  ) extends Result
+  implicit class ToFrontendViewOps(kafkaView: ResultKafkaView) {
+    def toFrontendView: ResultFrontendView = kafkaView match {
+      case Success(duration, submission) => ResultFrontendView.Success(submission.code, submission.language, duration)
+      case Failure(duration, submission) => ResultFrontendView.Failure(submission.code, submission.language, duration)
+    }
+  }
+
+}
+
+/** This is the result of the checking that the frontend will receive from the result backend (Kafka).
+  */
+sealed trait ResultFrontendView
+object ResultFrontendView {
+  final case class Success(code: String, language: Language, duration: Duration) extends ResultFrontendView
+  final case class Failure(code: String, language: Language, duration: Option[Duration]) extends ResultFrontendView
 }
