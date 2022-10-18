@@ -1,11 +1,7 @@
 import "./TaskSubmit.css";
 
 import CodeEditor from "@uiw/react-textarea-code-editor";
-import { Heading } from "grommet";
-import { Select } from "grommet";
-import { Paragraph } from "grommet";
-import { Button } from "grommet";
-import { Form } from "grommet";
+import { Button , Form,Heading , Paragraph , Select  } from "grommet";
 import { useRef, useState } from "react";
 
 import ContestNav from "../../common/ContestNav";
@@ -31,14 +27,16 @@ export default function TaskSubmit() {
   const codeRef = useRef();
 
   async function onSubmit() {
-    const PROBLEM_ID = "1";
+    // const PROBLEM_ID = "1";
     const USER_ID = "1";
 
     const data = {
-      problemId: PROBLEM_ID,
+      problemId: task,
       userId: USER_ID,
-      language: toTitleCase(language),
-      code: codeRef.current.value,
+      solution: {
+        language: toTitleCase(language),
+        code: codeRef.current.value,
+      },
     };
 
     console.log(data);

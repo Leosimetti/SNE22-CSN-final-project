@@ -9,14 +9,15 @@ module.exports = {
     ecmaFeatures: {
       jsx: true,
     },
-    ecmaVersion: 12,
+    ecmaVersion: "latest",
     sourceType: "module",
   },
-  plugins: ["react", "simple-import-sort", "unused-imports"],
+  plugins: ["react", "simple-import-sort", "unused-imports", "import"],
   rules: {
     "simple-import-sort/imports": "error",
     "simple-import-sort/exports": "error",
     "react/react-in-jsx-scope": "off",
     "react/prop-types": "off",
+    "import/no-duplicates": "error",
   },
 };
