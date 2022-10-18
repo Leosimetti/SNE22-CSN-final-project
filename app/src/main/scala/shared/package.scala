@@ -1,14 +1,14 @@
 package shared
 
-import io.circe.generic.semiauto.deriveDecoder
+import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder}
 import org.latestbit.circe.adt.codec._
-
-import scala.concurrent.duration.Duration
+import sttp.tapir.Schema
 
 object types {
   type UserId = String
   type ProblemId = String
+  type ExecutionTimeRatio = Double
   type ExecutionTimeThreshold = Double
 }
 
@@ -21,22 +21,27 @@ object Language {
 
   implicit val decoder: Decoder[Language] = JsonTaggedAdtCodec.createPureEnumDecoder[Language]()
   implicit val encoder: Encoder[Language] = JsonTaggedAdtCodec.createPureEnumEncoder[Language]()
-
+  implicit val schema: Schema[Language] = Schema.derived
 }
 
-final case class ReferenceSolution(code: String, language: Language)
-object ReferenceSolution {
-  implicit val decoder: Decoder[ReferenceSolution] = deriveDecoder
+final case class Solution(code: String, language: Language)
+object Solution {
+  implicit val decoder: Decoder[Solution] = deriveDecoder
+  implicit val encoder: Encoder[Solution] = deriveEncoder
+  implicit val schema: Schema[Solution] = Schema.derived
 }
-final case class UserSubmission(problemId: ProblemId, userId: UserId, code: String, language: Language)
+
+final case class UserSubmission(problemId: ProblemId, userId: UserId, solution: Solution)
 object UserSubmission {
   implicit val decoder: Decoder[UserSubmission] = deriveDecoder
+  implicit val encoder: Encoder[UserSubmission] = deriveEncoder
+  implicit val schema: Schema[UserSubmission] = Schema.derived
 }
 
 final case class Problem(
     problemId: ProblemId,
     testInputs: List[String],
-    referenceSolutions: List[ReferenceSolution],
+    referenceSolutions: List[Solution],
     executionTimeThreshold: ExecutionTimeThreshold,
 )
 object Problem {
@@ -45,7 +50,7 @@ object Problem {
 
 final case class Task(
     problem: Problem,
-    userSolution: UserSubmission,
+    userSubmission: UserSubmission,
 )
 object Task {
   implicit val decoder: Decoder[Task] = deriveDecoder
@@ -60,7 +65,7 @@ sealed trait ResultKafkaView {
   */
 object ResultKafkaView {
   final case class Success(
-      duration: Duration,
+      duration: ExecutionTimeRatio,
       override val submission: UserSubmission,
   ) extends ResultKafkaView
 
@@ -68,7 +73,7 @@ object ResultKafkaView {
     * duration is relevant, and the cases where the duration is irrelevant.
     */
   final case class Failure(
-      duration: Option[Duration],
+      duration: Option[ExecutionTimeRatio],
       override val submission: UserSubmission,
   ) extends ResultKafkaView
 
@@ -79,8 +84,10 @@ object ResultKafkaView {
 
   implicit class ToFrontendViewOps(kafkaView: ResultKafkaView) {
     def toFrontendView: ResultFrontendView = kafkaView match {
-      case Success(duration, submission) => ResultFrontendView.Success(submission.code, submission.language, duration)
-      case Failure(duration, submission) => ResultFrontendView.Failure(submission.code, submission.language, duration)
+      case Success(duration, submission) =>
+        ResultFrontendView.Success(submission.solution.code, submission.solution.language, duration)
+      case Failure(duration, submission) =>
+        ResultFrontendView.Failure(submission.solution.code, submission.solution.language, duration)
     }
   }
 
@@ -90,6 +97,7 @@ object ResultKafkaView {
   */
 sealed trait ResultFrontendView
 object ResultFrontendView {
-  final case class Success(code: String, language: Language, duration: Duration) extends ResultFrontendView
-  final case class Failure(code: String, language: Language, duration: Option[Duration]) extends ResultFrontendView
+  final case class Success(code: String, language: Language, duration: ExecutionTimeRatio) extends ResultFrontendView
+  final case class Failure(code: String, language: Language, duration: Option[ExecutionTimeRatio])
+      extends ResultFrontendView
 }
