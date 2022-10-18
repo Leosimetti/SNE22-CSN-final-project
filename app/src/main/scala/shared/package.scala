@@ -8,7 +8,7 @@ import sttp.tapir.Schema
 object types {
   type UserId = String
   type ProblemId = String
-  type ExecutionTimeRation = Double
+  type ExecutionTimeRatio = Double
   type ExecutionTimeThreshold = Double
 }
 
@@ -65,7 +65,7 @@ sealed trait ResultKafkaView {
   */
 object ResultKafkaView {
   final case class Success(
-      duration: ExecutionTimeRation,
+      duration: ExecutionTimeRatio,
       override val submission: UserSubmission,
   ) extends ResultKafkaView
 
@@ -73,7 +73,7 @@ object ResultKafkaView {
     * duration is relevant, and the cases where the duration is irrelevant.
     */
   final case class Failure(
-      duration: Option[ExecutionTimeRation],
+      duration: Option[ExecutionTimeRatio],
       override val submission: UserSubmission,
   ) extends ResultKafkaView
 
@@ -97,7 +97,7 @@ object ResultKafkaView {
   */
 sealed trait ResultFrontendView
 object ResultFrontendView {
-  final case class Success(code: String, language: Language, duration: ExecutionTimeRation) extends ResultFrontendView
-  final case class Failure(code: String, language: Language, duration: Option[ExecutionTimeRation])
+  final case class Success(code: String, language: Language, duration: ExecutionTimeRatio) extends ResultFrontendView
+  final case class Failure(code: String, language: Language, duration: Option[ExecutionTimeRatio])
       extends ResultFrontendView
 }
