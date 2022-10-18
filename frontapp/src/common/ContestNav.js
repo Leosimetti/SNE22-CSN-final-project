@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import URLs from "./URLs";
 import { useLocation } from "react-router-dom";
 
-export default function ContestNav({ current }) {
+export default function ContestNav() {
   const navigate = useNavigate();
   const currentLocation = useLocation();
 

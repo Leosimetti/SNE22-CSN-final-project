@@ -28,7 +28,7 @@ function App() {
       <Router>
         <Page fill background="blackBorder">
           <PageContent background="white" style={{ padding: "0" }}>
-            <div style={{ "min-height": "100vh" }}>
+            <div style={{ minHeight: "100vh" }}>
               <Header background={"brand"}>
                 <Link to="/">
                   <Heading margin="20px" color="white">

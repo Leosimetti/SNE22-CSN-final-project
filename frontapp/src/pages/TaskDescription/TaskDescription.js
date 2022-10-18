@@ -13,7 +13,7 @@ export default function TaskDescription() {
     <>
       <ContestNav />
       <Heading style={{"line-height": "20px"}}>Taskname</Heading>
-      <Paragraph responsive style={{ "max-width": "100%" }} size="xlarge">
+      <Paragraph responsive style={{ maxWidth: "100%" }} size="xlarge">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
         tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
         veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
@@ -23,14 +23,14 @@ export default function TaskDescription() {
         mollit anim id est laborum.
       </Paragraph>
       <Heading>Input</Heading>
-      <Paragraph responsive style={{ "max-width": "100%" }} size="xlarge">
+      <Paragraph responsive style={{ maxWidth: "100%" }} size="xlarge">
         The first line contains a single integer N (1≤N≤106), denoting the
         number of days Mel will get ingredients. <br />
         The next line contains N integers a1,...,aN (1≤ai≤5), where Mel can
         build layer ai on the ith day, if he chooses.
       </Paragraph>
       <Heading>Output</Heading>
-      <Paragraph responsive style={{ "max-width": "100%" }} size="xlarge">
+      <Paragraph responsive style={{ maxWidth: "100%" }} size="xlarge">
         Output one integer, the number of cakes Mel can finish.
       </Paragraph>
       <Heading>Example</Heading>
