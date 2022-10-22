@@ -1,21 +1,85 @@
 syntax = "proto3";
 
-package schema;
-
-// The greeting service definition.
-service Greeter {
-  // Sends a greeting
-  rpc SayHello (HelloRequest) returns (HelloReply) {}
-
-  rpc SayHelloStream (stream HelloRequest) returns (stream HelloReply) {}
+service App {
+  rpc submit(UserSubmission) returns (SubmitResponse);
+  rpc mySubmissions(MySubmissionsRequest) returns (MySubmissionsResponse);
 }
 
-// The request message containing the user's name.
-message HelloRequest {
-  string name = 1;
+message SubmitResponse {
+  string status = 1;
 }
 
-// The response message containing the greetings
-message HelloReply {
-  string message = 1;
+message MySubmissionsRequest {
+  string problemId = 1;
+  string userId = 2;
 }
+
+message MySubmissionsResponse {
+  repeated ResultFrontendView results = 1;
+}
+
+enum Language {
+  python = 0;
+}
+
+message Solution {
+  string code = 1;
+  Language language = 2;
+}
+
+message UserSubmission {
+  string problemId = 1;
+  string userId = 2;
+  Solution solution = 3;
+}
+
+message Problem {
+  string problemId = 1;
+  repeated string testInputs = 2;
+  repeated Solution referenceSolutions = 3;
+  double executionTimeThreshold = 4;
+}
+
+message Task {
+  Problem problem = 1;
+  UserSubmission userSubmission = 2;
+}
+
+// BEGIN Horrible repetition
+message ResultKafkaView {
+  oneof sealed_value {
+    KafkaSuccess success = 1;
+    KafkaFailure failure = 2;
+  }
+}
+
+message KafkaSuccess {
+  double duration = 1;
+  UserSubmission  submission = 2;
+}
+
+message KafkaFailure {
+  double duration = 1;
+  UserSubmission submission = 2;
+}
+
+message FrontendSuccess {
+  double duration = 1;
+  Solution solution = 2;
+}
+
+message FrontendFailure {
+  double duration = 1;
+  Solution solution = 2;
+}
+
+message ResultFrontendView {
+
+  oneof sealed_value {
+    FrontendSuccess success = 1;
+    FrontendFailure failure = 2;
+  }
+
+}
+
+// END Horrible repetition
