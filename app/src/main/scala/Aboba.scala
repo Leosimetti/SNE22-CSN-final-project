@@ -2,18 +2,19 @@ import cats.Foldable
 import cats.data.Chain
 import cats.effect._
 import cats.syntax.all._
-import fs2.{Chunk, Pipe, Stream}
-
-import scala.concurrent.duration._
+import fs2.{Chunk, Pipe, Pure, Stream}
 
 object Aboba extends IOApp.Simple {
 
   case class Result(key: String, value: Int)
 
-  val in: Stream[IO, Result] =
+  val in: Stream[Pure, Result] =
+//    Stream
+//      .eval(IO.println("here"))
+//      .repeat
+//      .zipRight(
     Stream(Result("a", 1), Result("b", 2), Result("c", 3), Result("a", 1), Result("a", 1)).repeat
-      .zip(Stream.awakeEvery[IO](1000.millis))
-      .map(_._1)
+      .zipLeft(Stream(1).repeat)
 
   def average[F[_]: Foldable](c: F[Result]): Double = {
     val (size, sum) = c.foldLeft((0, 0)) { case ((size, sum), next) =>
@@ -40,9 +41,12 @@ object Aboba extends IOApp.Simple {
         }
         val updatedValue = updatedState(updatedKey)
 
-        if (updatedValue.size == 3)
+        println(updatedState)
+
+        if (updatedValue.size == 3) {
+          // TODO: this line discards the remaining part of the chunk, need to fix this
           (updatedState.removed(updatedKey), Chunk(average(updatedValue)))
-        else
+        } else
           loop(tail, updatedState)
       }
     }
@@ -53,8 +57,8 @@ object Aboba extends IOApp.Simple {
       }
   }
 
-  val out: Stream[IO, Unit] = in.through(pipe).evalMap(IO.println)
+//  val out: Stream[IO, Unit] = in.through(pipe).evalMap(IO.println)
 
   override def run: IO[Unit] =
-    out.compile.drain
+    in.through(pipe).evalMap(IO.println).compile.drain
 }
