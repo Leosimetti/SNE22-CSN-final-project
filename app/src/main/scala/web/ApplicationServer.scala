@@ -14,8 +14,7 @@ final case class ApplicationServer(
   private def putTaskIntoRabbitMQ(s: UserSubmission): IO[SubmitResponse] = {
     for {
       _ <- IO.println(s)
-      res <- IO.pure(SubmitResponse("VSYO NORM"))
-    } yield res
+    } yield SubmitResponse("VSYO NORM")
   }
 
   override def submit(request: UserSubmission, ctx: Metadata): IO[SubmitResponse] = putTaskIntoRabbitMQ(request)
