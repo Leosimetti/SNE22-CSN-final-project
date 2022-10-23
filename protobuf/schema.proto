@@ -71,10 +71,12 @@ message Result {
 message Success {
   double duration = 1;
   Solution solution = 2;
+  string taskId = 3;
 }
 
 message Failure {
   double duration = 1;
   Solution solution = 2;
+  string taskId = 3;
 }
 // END Result definition
