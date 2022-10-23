@@ -3,6 +3,7 @@ syntax = "proto3";
 service App {
   rpc submit(UserSubmission) returns (SubmitResponse);
   rpc mySubmissions(MySubmissionsRequest) returns (MySubmissionsResponse);
+  rpc myTaskSubmissions(MyTaskSubmissionsRequest) returns (MySubmissionsResponse);
 }
 
 message SubmitResponse {
@@ -10,12 +11,16 @@ message SubmitResponse {
 }
 
 message MySubmissionsRequest {
+  string userId = 2;
+}
+
+message MyTaskSubmissionsRequest {
   string problemId = 1;
   string userId = 2;
 }
 
 message MySubmissionsResponse {
-  repeated ResultFrontendView results = 1;
+  repeated Result results = 1;
 }
 
 enum Language {
@@ -45,41 +50,28 @@ message Task {
   UserSubmission userSubmission = 2;
 }
 
-// BEGIN Horrible repetition
-message ResultKafkaView {
+// BEGIN Result definition
+
+/*
+In Kafka we use:
+  - userId (string) as a topic name
+  - problemId (string) as a key
+  - result (Result) as a value
+ */
+message Result {
   oneof sealed_value {
-    KafkaSuccess success = 1;
-    KafkaFailure failure = 2;
+    Success success = 1;
+    Failure failure = 2;
   }
 }
 
-message KafkaSuccess {
-  double duration = 1;
-  UserSubmission  submission = 2;
-}
-
-message KafkaFailure {
-  double duration = 1;
-  UserSubmission submission = 2;
-}
-
-message FrontendSuccess {
+message Success {
   double duration = 1;
   Solution solution = 2;
 }
 
-message FrontendFailure {
+message Failure {
   double duration = 1;
   Solution solution = 2;
 }
-
-message ResultFrontendView {
-
-  oneof sealed_value {
-    FrontendSuccess success = 1;
-    FrontendFailure failure = 2;
-  }
-
-}
-
-// END Horrible repetition
+// END Result definition
