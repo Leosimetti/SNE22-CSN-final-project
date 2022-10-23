@@ -4,8 +4,8 @@ package shared;
 
 service App {
   rpc submit(UserSubmission) returns (SubmitResponse);
-  rpc mySubmissions(MySubmissionsRequest) returns (MySubmissionsResponse);
-  rpc myTaskSubmissions(MyTaskSubmissionsRequest) returns (MySubmissionsResponse);
+  rpc mySubmissions(MySubmissionsRequest) returns (stream MySubmissionsResponse);
+  rpc myTaskSubmissions(MyTaskSubmissionsRequest) returns (stream MySubmissionsResponse);
 }
 
 message SubmitResponse {
@@ -22,7 +22,7 @@ message MyTaskSubmissionsRequest {
 }
 
 message MySubmissionsResponse {
-  repeated Result results = 1;
+  Result result = 1;
 }
 
 enum Language {

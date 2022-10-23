@@ -1,5 +1,6 @@
 package web
 import cats.effect.{IO, IOApp, Resource}
+import fs2.Stream
 import fs2.grpc.syntax.all._
 import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder
 import io.grpc.{ManagedChannel, Metadata}
@@ -19,13 +20,13 @@ object ApplicationTestClient extends IOApp.Simple {
     userId = "aboba"
   )
 
-  def sendRequest(client: AppFs2Grpc[IO, Metadata]): IO[Unit] =
-    client.mySubmissions(request, new Metadata()).flatMap { reply =>
-      IO.delay(logger.info(s"${reply.toProtoString}"))
+  def sendRequest(client: AppFs2Grpc[IO, Metadata]): Stream[IO, Unit] =
+    client.mySubmissions(request, new Metadata()).evalMap { reply =>
+      IO(logger.info(reply.result.asMessage.toProtoString))
     }
 
   val run: IO[Unit] =
     managedChannelResource
       .flatMap(managedChannel => AppFs2Grpc.clientResource[IO, Metadata](managedChannel, identity))
-      .use(client => fs2.Stream.eval(sendRequest(client)).repeatN(100).compile.drain)
+      .use(client => sendRequest(client).compile.drain)
 }

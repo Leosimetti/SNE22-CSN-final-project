@@ -14,7 +14,7 @@ object Main extends IOApp {
   val consumerSettings: ConsumerSettings[IO, ProblemId, Result] =
     ConsumerSettings[IO, ProblemId, Result]
       .withAutoOffsetReset(AutoOffsetReset.Earliest)
-      .withBootstrapServers("localhost:9092")
+      .withBootstrapServers("192.168.31.206:9092")
       .withGroupId("group")
 
   val resultRepository: ResultRepository[IO] = ResultRepository[IO](consumerSettings)

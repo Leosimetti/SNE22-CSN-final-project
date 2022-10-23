@@ -1,6 +1,7 @@
 package web
 
 import cats.effect._
+import fs2.Stream
 import io.grpc.Metadata
 import kafka.ResultRepository
 import shared._
@@ -19,9 +20,9 @@ final case class ApplicationServer(
 
   override def submit(request: UserSubmission, ctx: Metadata): IO[SubmitResponse] = putTaskIntoRabbitMQ(request)
 
-  override def mySubmissions(request: MySubmissionsRequest, ctx: Metadata): IO[MySubmissionsResponse] =
+  override def mySubmissions(request: MySubmissionsRequest, ctx: Metadata): Stream[IO, MySubmissionsResponse] =
     resultBackend.getResults(request.userId).map(MySubmissionsResponse(_))
 
-  override def myTaskSubmissions(request: MyTaskSubmissionsRequest, ctx: Metadata): IO[MySubmissionsResponse] =
+  override def myTaskSubmissions(request: MyTaskSubmissionsRequest, ctx: Metadata): Stream[IO, MySubmissionsResponse] =
     resultBackend.getTaskResults(request.userId, request.problemId).map(MySubmissionsResponse(_))
 }

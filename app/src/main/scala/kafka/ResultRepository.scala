@@ -1,13 +1,13 @@
 package kafka
 import cats.effect.Async
-import fs2.Pipe
 import fs2.kafka.{CommittableConsumerRecord, ConsumerSettings, KafkaConsumer}
+import fs2.{Pipe, Stream}
 import shared.Result
 import shared.types.{ProblemId, UserId}
 
 trait ResultRepository[F[_]] {
-  def getResults(userId: UserId): F[List[Result.NonEmpty]]
-  def getTaskResults(userId: UserId, problemId: ProblemId): F[List[Result.NonEmpty]]
+  def getResults(userId: UserId): Stream[F, Result.NonEmpty]
+  def getTaskResults(userId: UserId, problemId: ProblemId): Stream[F, Result.NonEmpty]
 }
 
 object ResultRepository {
@@ -15,7 +15,7 @@ object ResultRepository {
       consumerSettings: ConsumerSettings[F, ProblemId, Result]
   ): ResultRepository[F] = new ResultRepository[F] {
 
-    private def recordStream(userId: UserId) =
+    private def recordStream(userId: UserId): Stream[F, CommittableConsumerRecord[F, ProblemId, Result]] =
       KafkaConsumer
         .stream(consumerSettings)
         .subscribeTo(userId)
@@ -29,19 +29,15 @@ object ResultRepository {
           }
         }
 
-    override def getResults(userId: UserId): F[List[Result.NonEmpty]] = {
+    override def getResults(userId: UserId): Stream[F, Result.NonEmpty] = {
       recordStream(userId)
         .through(nonEmptyResults)
-        .compile
-        .toList
     }
 
-    override def getTaskResults(userId: UserId, problemId: ProblemId): F[List[Result.NonEmpty]] =
+    override def getTaskResults(userId: UserId, problemId: ProblemId): Stream[F, Result.NonEmpty] =
       recordStream(userId)
         .filter(_.record.key == problemId)
         .through(nonEmptyResults)
-        .compile
-        .toList
 
   }
 }
