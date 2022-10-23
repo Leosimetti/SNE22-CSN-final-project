@@ -48,8 +48,9 @@ message Problem {
 }
 
 message Task {
-  Problem problem = 1;
-  UserSubmission userSubmission = 2;
+  string taskId = 1;
+  Problem problem = 2;
+  UserSubmission userSubmission = 3;
 }
 
 // BEGIN Result definition

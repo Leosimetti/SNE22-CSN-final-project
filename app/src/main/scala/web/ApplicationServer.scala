@@ -4,21 +4,15 @@ import cats.effect._
 import fs2.Stream
 import io.grpc.Metadata
 import kafka.ResultRepository
+import rabbitmq.TaskRepository
 import shared._
 
 final case class ApplicationServer(
-    /* rabbitMq: RabbitMqRepository[IO] */
-    resultBackend: ResultRepository[IO]
+    rabbitMq: TaskRepository[IO],
+    resultBackend: ResultRepository[IO],
 ) extends AppFs2Grpc[IO, Metadata] {
 
-  // TODO:
-  private def putTaskIntoRabbitMQ(s: UserSubmission): IO[SubmitResponse] = {
-    for {
-      _ <- IO.println(s)
-    } yield SubmitResponse("VSYO NORM")
-  }
-
-  override def submit(request: UserSubmission, ctx: Metadata): IO[SubmitResponse] = putTaskIntoRabbitMQ(request)
+  override def submit(request: UserSubmission, ctx: Metadata): IO[SubmitResponse] = rabbitMq.submitTask(request)
 
   override def mySubmissions(request: MySubmissionsRequest, ctx: Metadata): Stream[IO, MySubmissionsResponse] =
     resultBackend.getResults(request.userId).map(MySubmissionsResponse(_))
