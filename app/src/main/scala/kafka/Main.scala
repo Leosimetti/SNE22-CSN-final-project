@@ -13,16 +13,16 @@ object Main extends IOApp.Simple {
 
     val producerSettings =
       ProducerSettings[IO, ProblemId, Result]
-        .withBootstrapServers("localhost:9092")
+        .withBootstrapServers("192.168.31.206:9092")
 
-    val solution = Solution(code = "print()", language = python)
-    val res: Result = Success(duration = 0.2d, solution = Some(solution))
     val produces = KafkaProducer.stream(producerSettings).flatMap { producer =>
-      Stream("zhepa", "a+b")
-        .evalMap { problemId =>
+      Stream("L", "+ratio")
+        .evalMap { code =>
+          val solution = Solution(code = code, language = python)
+          val res: Result = Success(duration = 0.2d, solution = Some(solution))
           IO.pure(
             ProducerRecords
-              .one(ProducerRecord("aboba", problemId, res))
+              .one(ProducerRecord("aboba", "KEKW", res))
           )
         }
         .through(KafkaProducer.pipe(producerSettings, producer))
