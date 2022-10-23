@@ -26,5 +26,8 @@ lazy val app = (project in file("app"))
       "org.http4s" %% "http4s-ember-client" % http4sVersion,
     ),
     Compile / PB.protoSources := Seq(file("protobuf")),
+    scalapbCodeGeneratorOptions ++= Seq(
+      CodeGeneratorOption.FlatPackage
+    ),
   )
   .enablePlugins(Fs2Grpc)

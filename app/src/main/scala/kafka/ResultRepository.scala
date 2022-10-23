@@ -1,28 +1,47 @@
 package kafka
 import cats.effect.Async
-import fs2.kafka.{ConsumerSettings, KafkaConsumer}
+import fs2.Pipe
+import fs2.kafka.{CommittableConsumerRecord, ConsumerSettings, KafkaConsumer}
+import shared.Result
 import shared.types.{ProblemId, UserId}
-import shared.{ResultFrontendView, ResultKafkaView}
 
 trait ResultRepository[F[_]] {
-  def getResults(userId: UserId, problemId: ProblemId): F[List[ResultFrontendView]]
+  def getResults(userId: UserId): F[List[Result.NonEmpty]]
+  def getTaskResults(userId: UserId, problemId: ProblemId): F[List[Result.NonEmpty]]
 }
 
 object ResultRepository {
   def apply[F[_]: Async](
-      consumerSettings: ConsumerSettings[F, ProblemId, ResultKafkaView]
+      consumerSettings: ConsumerSettings[F, ProblemId, Result]
   ): ResultRepository[F] = new ResultRepository[F] {
-    override def getResults(userId: UserId, problemId: ProblemId): F[List[ResultFrontendView]] = {
+
+    private def recordStream(userId: UserId) =
       KafkaConsumer
         .stream(consumerSettings)
-        .subscribeTo(problemId)
+        .subscribeTo(userId)
         .records
-        .filter { committable =>
-          committable.record.value.submission.userId == userId
+
+    private val nonEmptyResults: Pipe[F, CommittableConsumerRecord[F, ProblemId, Result], Result.NonEmpty] =
+      commitables =>
+        commitables.collect { committable =>
+          committable.record.value match {
+            case res: Result.NonEmpty => res
+          }
         }
-        .map(_.record.value.toFrontendView)
+
+    override def getResults(userId: UserId): F[List[Result.NonEmpty]] = {
+      recordStream(userId)
+        .through(nonEmptyResults)
         .compile
         .toList
     }
+
+    override def getTaskResults(userId: UserId, problemId: ProblemId): F[List[Result.NonEmpty]] =
+      recordStream(userId)
+        .filter(_.record.key == problemId)
+        .through(nonEmptyResults)
+        .compile
+        .toList
+
   }
 }

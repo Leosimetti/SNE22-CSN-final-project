@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+package shared;
+
 service App {
   rpc submit(UserSubmission) returns (SubmitResponse);
   rpc mySubmissions(MySubmissionsRequest) returns (MySubmissionsResponse);
