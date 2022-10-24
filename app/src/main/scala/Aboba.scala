@@ -2,19 +2,22 @@ import cats.Foldable
 import cats.data.Chain
 import cats.effect._
 import cats.syntax.all._
-import fs2.{Chunk, Pipe, Pure, Stream}
+import fs2.{Chunk, Pipe, Stream}
+
+import scala.concurrent.duration._
 
 object Aboba extends IOApp.Simple {
 
   case class Result(key: String, value: Int)
 
-  val in: Stream[Pure, Result] =
+  val in: Stream[IO, Result] =
 //    Stream
 //      .eval(IO.println("here"))
 //      .repeat
 //      .zipRight(
     Stream(Result("a", 1), Result("b", 2), Result("c", 3), Result("a", 1), Result("a", 1)).repeat
-      .zipLeft(Stream(1).repeat)
+      .zipLeft(Stream.awakeEvery[IO](1.second))
+//      .zipLeft(Stream(1).repeat)
 
   def average[F[_]: Foldable](c: F[Result]): Double = {
     val (size, sum) = c.foldLeft((0, 0)) { case ((size, sum), next) =>
@@ -27,10 +30,14 @@ object Aboba extends IOApp.Simple {
     type State = Map[String, Chain[Result]]
 
     @annotation.tailrec
-    def loop(remaining: Chunk[Result], state: State): (State, Chunk[Double]) = {
+    def loop(
+        remaining: Chunk[Result],
+        state: State,
+        results: Chunk[Double] = Chunk.empty[Double],
+    ): (State, Chunk[Double]) = {
       val maybeHead = remaining.head
       if (maybeHead.isEmpty)
-        (state, Chunk.empty[Double])
+        (state, results)
       else {
         val head = maybeHead.get
         val tail = remaining.drop(1)
@@ -41,13 +48,10 @@ object Aboba extends IOApp.Simple {
         }
         val updatedValue = updatedState(updatedKey)
 
-        println(updatedState)
-
         if (updatedValue.size == 3) {
-          // TODO: this line discards the remaining part of the chunk, need to fix this
-          (updatedState.removed(updatedKey), Chunk(average(updatedValue)))
+          loop(tail, updatedState.removed(updatedKey), results ++ Chunk(average(updatedValue)))
         } else
-          loop(tail, updatedState)
+          loop(tail, updatedState, results)
       }
     }
 
