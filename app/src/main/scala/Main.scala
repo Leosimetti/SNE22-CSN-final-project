@@ -18,7 +18,7 @@ object Main extends IOApp {
   val consumerSettings: ConsumerSettings[IO, ProblemId, Result] =
     ConsumerSettings[IO, ProblemId, Result]
       .withAutoOffsetReset(AutoOffsetReset.Earliest)
-      .withBootstrapServers("192.168.31.206:9092")
+      .withBootstrapServers("localhost:9092")
       .withGroupId("group")
 
   val rabbitSettings: Fs2RabbitConfig = Fs2RabbitConfig(

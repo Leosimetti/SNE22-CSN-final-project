@@ -13,18 +13,17 @@ object Main extends IOApp.Simple {
 
     val producerSettings =
       ProducerSettings[IO, ProblemId, Result]
-        .withBootstrapServers("192.168.31.206:9092")
+        .withBootstrapServers("localhost:9092")
 
     val produces = KafkaProducer.stream(producerSettings).flatMap { producer =>
-      Stream("L", "+ratio")
-        .evalMap { code =>
-          val solution = Solution(code = code, language = python)
-          val res: Result = Success(duration = 0.2d, solution = Some(solution))
-          IO.pure(
-            ProducerRecords
-              .one(ProducerRecord("aboba", "KEKW", res))
-          )
+      Stream("L", "+ratio", "+didn't ask", "L", "L")
+        .map { taskID =>
+          val solution = Solution(code = "cringe()", language = python)
+          val res: Result = Success(duration = 0.2d, taskId = taskID, solution = Some(solution))
+          ProducerRecords
+            .one(ProducerRecord("aboba", "KEKW", res))
         }
+        .covary[IO]
         .through(KafkaProducer.pipe(producerSettings, producer))
     }
 
