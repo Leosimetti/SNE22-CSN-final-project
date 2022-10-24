@@ -1,8 +1,9 @@
 import { Grommet, Header, Heading, Page, PageContent } from "grommet";
-import { BrowserRouter as Router, Link,Route, Routes } from "react-router-dom";
+import { BrowserRouter as Router, Link, Route, Routes } from "react-router-dom";
 
 import URLs from "./common/URLs";
 import Home from "./pages/Home/Home";
+import PersonalSubmissions from "./pages/PersonalSubmissions/PersonalSubmissions";
 import TaskDescription from "./pages/TaskDescription/TaskDescription";
 import Tasks from "./pages/Tasks/Tasks";
 import TaskSubmit from "./pages/TaskSubmit/TaskSubmit";
@@ -46,6 +47,10 @@ function App() {
                   <Route path={URLs.tasks} element={<Tasks />} />
                   <Route path={URLs.home} element={<Home />} />
                   <Route path={URLs.taskSubmit} element={<TaskSubmit />} />
+                  <Route
+                    path={URLs.personalSubmissions}
+                    element={<PersonalSubmissions />}
+                  />
                 </Routes>
               </div>
             </div>
