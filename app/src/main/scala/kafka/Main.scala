@@ -3,54 +3,57 @@ package kafka
 import cats.effect.{IO, IOApp}
 import fs2.Stream
 import fs2.kafka._
-
-import scala.concurrent.duration._
+import kafka.implicits._
+import shared.Language.python
+import shared.types.ProblemId
+import shared.{Result, Solution, Success}
 
 object Main extends IOApp.Simple {
   val run: IO[Unit] = {
-    def processRecord(
-        record: ConsumerRecord[Int, String]
-    ): IO[(Int, String)] =
-      IO.pure(record.key -> record.value)
 
     val producerSettings =
-      ProducerSettings[IO, Int, String]
+      ProducerSettings[IO, ProblemId, Result]
         .withBootstrapServers("localhost:9092")
 
     val produces = KafkaProducer.stream(producerSettings).flatMap { producer =>
-      Stream
-        .range(1, 100)
-        .evalMap { i =>
-          IO.pure(
-            ProducerRecords
-              .one(ProducerRecord("topic", i, i.toString + i.toString))
-          )
+      Stream("L", "+ratio", "+didn't ask", "L", "L")
+        .map { taskID =>
+          val solution = Solution(code = "cringe()", language = python)
+          val res: Result = Success(duration = 0.2d, taskId = taskID, solution = Some(solution))
+          ProducerRecords
+            .one(ProducerRecord("aboba", "KEKW", res))
         }
+        .covary[IO]
         .through(KafkaProducer.pipe(producerSettings, producer))
     }
 
-    val consumerSettings =
-      ConsumerSettings[IO, Int, String]
-        .withAutoOffsetReset(AutoOffsetReset.Earliest)
-        .withBootstrapServers("localhost:9092")
-        .withGroupId("group")
+//    def processRecord(
+//                       record: ConsumerRecord[Int, String]
+//                     ): IO[(Int, String)] =
+//      IO.pure(record.key -> record.value)
 
-    val stream =
-      KafkaConsumer
-        .stream(consumerSettings)
-        .subscribeTo("topic")
-        .records
-        .mapAsync(25) { committable =>
-          processRecord(committable.record)
-            .map { case (key, value) =>
-              val record = ProducerRecord("topic", key, value)
-              ProducerRecords.one(record, committable.offset)
-            }
-        }
-        .through(KafkaProducer.pipe(producerSettings))
-        .map(_.passthrough)
-        .through(commitBatchWithin(500, 15.seconds))
+    //    val consumerSettings =
+//      ConsumerSettings[IO, Int, String]
+//        .withAutoOffsetReset(AutoOffsetReset.Earliest)
+//        .withBootstrapServers("localhost:9092")
+//        .withGroupId("group")
+//
+//    val stream =
+//      KafkaConsumer
+//        .stream(consumerSettings)
+//        .subscribeTo("topic")
+//        .records
+//        .mapAsync(25) { committable =>
+//          processRecord(committable.record)
+//            .map { case (key, value) =>
+//              val record = ProducerRecord("topic", key, value)
+//              ProducerRecords.one(record, committable.offset)
+//            }
+//        }
+//        .through(KafkaProducer.pipe(producerSettings))
+//        .map(_.passthrough)
+//        .through(commitBatchWithin(500, 15.seconds))
 
-    stream.compile.drain
+    produces.compile.drain
   }
 }
