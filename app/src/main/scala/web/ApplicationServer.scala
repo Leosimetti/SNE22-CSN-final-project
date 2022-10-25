@@ -12,7 +12,8 @@ final case class ApplicationServer(
     resultBackend: ResultRepository[IO],
 ) extends AppFs2Grpc[IO, Metadata] {
 
-  override def submit(request: UserSubmission, ctx: Metadata): IO[SubmitResponse] = rabbitMq.submitTask(request)
+  override def submit(request: UserSubmission, ctx: Metadata): IO[SubmitResponse] = IO.pure(SubmitResponse("OK"))
+//    rabbitMq.submitTask(request)
 
   override def mySubmissions(request: MySubmissionsRequest, ctx: Metadata): Stream[IO, MySubmissionsResponse] =
     resultBackend.getResults(request.userId).map(MySubmissionsResponse(_))

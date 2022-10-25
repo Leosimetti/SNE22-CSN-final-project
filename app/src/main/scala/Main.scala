@@ -1,9 +1,14 @@
 import cats.effect.{ExitCode, IO, IOApp}
+import com.linecorp.armeria.common.grpc.protocol.GrpcHeaderNames
+import com.linecorp.armeria.common.scalapb.ScalaPbJsonMarshaller
+import com.linecorp.armeria.common.{HttpHeaderNames, HttpMethod}
+import com.linecorp.armeria.server.Server
+import com.linecorp.armeria.server.cors.CorsService
+import com.linecorp.armeria.server.grpc.GrpcService
+import com.linecorp.armeria.server.logging.LoggingService
 import dev.profunktor.fs2rabbit.config.Fs2RabbitConfig
 import dev.profunktor.fs2rabbit.interpreter.RabbitClient
-import fs2.grpc.syntax.all._
 import fs2.kafka.{AutoOffsetReset, ConsumerSettings}
-import io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder
 import kafka.ResultRepository
 import kafka.implicits._
 import rabbitmq.TaskRepository
@@ -43,13 +48,48 @@ object Main extends IOApp {
         AppFs2Grpc.bindServiceResource(ApplicationServer(submitRepo, resultRepo))
     } yield appService
 
-    app.use(service =>
-      NettyServerBuilder
-        .forPort(9999)
-        .addService(service)
-        .resource[IO]
-        .evalMap(server => IO.delay(server.start()))
-        .useForever
-    )
+    app.use { service =>
+      val corsBuilder = CorsService
+        .builderForAnyOrigin()
+        .allowRequestMethods(HttpMethod.POST)
+        .allowRequestHeaders( // Allow POST method.
+          // Allow Content-type and X-GRPC-WEB headers.
+          HttpHeaderNames.CONTENT_TYPE,
+          HttpHeaderNames.of("X-GRPC-WEB"),
+          HttpHeaderNames.of("X-USER-AGENT"),
+        )
+        .exposeHeaders( // Expose trailers of the HTTP response to the client.
+          GrpcHeaderNames.GRPC_STATUS,
+          GrpcHeaderNames.GRPC_MESSAGE,
+          GrpcHeaderNames.ARMERIA_GRPC_THROWABLEPROTO_BIN,
+        )
+
+      val grpcService =
+        GrpcService
+          .builder()
+          // Add your ScalaPB gRPC stub using `bindService()`
+          .addService(service)
+          // Register `ScalaPbJsonMarshaller` for supporting gRPC JSON format.
+//          .jsonMarshallerFactory(_ => ScalaPbJsonMarshaller())
+          .enableUnframedRequests(false)
+          .build()
+
+
+      // Creates Armeria Server for ScalaPB gRPC stub.
+      val server = Server
+        .builder()
+        .http(9999)
+//        .https(httpsPort)
+        .service(grpcService, corsBuilder.newDecorator())
+        .decorator(LoggingService.newDecorator())
+        // Add DocService for browsing the list of gRPC services and
+        // invoking a service operation from a web form.
+        // See https://armeria.dev/docs/server-docservice for more information.
+//        .serviceUnder("/docs", new DocService())
+        .build()
+
+      IO.fromCompletableFuture(IO.delay(server.start())).as(ExitCode.Success)
+
+    }
   }
 }

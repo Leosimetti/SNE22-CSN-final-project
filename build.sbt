@@ -8,6 +8,7 @@ val tapirVersion = "1.1.3"
 
 lazy val app = (project in file("app"))
   .settings(
+    javaOptions := Seq("-J-Dcom.linecorp.armeria.useOpenSsl=false"),
     name := "CSN-final-project",
     scalacOptions += "-Wnonunit-statement",
     libraryDependencies ++= Seq(
@@ -24,6 +25,7 @@ lazy val app = (project in file("app"))
       "com.softwaremill.sttp.tapir" %% "tapir-json-circe" % tapirVersion,
       "org.http4s" %% "http4s-ember-server" % http4sVersion,
       "org.http4s" %% "http4s-ember-client" % http4sVersion,
+      "com.linecorp.armeria" %% "armeria-scalapb" % "1.20.1",
     ),
     Compile / PB.protoSources := Seq(file("protobuf")),
     scalapbCodeGeneratorOptions ++= Seq(
