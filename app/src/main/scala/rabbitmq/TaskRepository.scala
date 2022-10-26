@@ -19,8 +19,10 @@ import dev.profunktor.fs2rabbit.model.{
   RoutingKey,
 }
 import dev.profunktor.fs2rabbit.resiliency.ResilientStream
+import fs2.kafka.{ConsumerSettings, KafkaConsumer}
 import fs2.{Pipe, Stream}
-import shared.{Problem, SubmitResponse, Task, UserSubmission}
+import shared.types.ProblemId
+import shared.{ProblemPrivateData, ProblemPublicData, SubmitResponse, Task, UserSubmission}
 
 trait TaskRepository[F[_]] {
   def submitTask(submission: UserSubmission): F[SubmitResponse]
@@ -29,36 +31,51 @@ trait TaskRepository[F[_]] {
 object TaskRepository {
 
   def apply[F[_]: Async: UUIDGen](
-      client: RabbitClient[F]
+      client: RabbitClient[F],
+      consumerSettings: ConsumerSettings[F, ProblemId, ProblemPrivateData],
   ): TaskRepository[F] = new TaskRepository[F] {
 
-    val queueName = QueueName("testQ")
+    val queueName = QueueName("Tasks")
     val exchangeName = ExchangeName("testEX")
     val routingKey = RoutingKey("testRK")
     implicit val messageEncoder: Kleisli[F, AmqpMessage[Array[Byte]], AmqpMessage[Array[Byte]]] =
       Kleisli(s => s.pure[F])
-
     implicit val messageDecoder: EnvelopeDecoder[F, Array[Byte]] =
       Kleisli(s => s.payload.pure[F])
+
+    private def createTask(problem: ProblemPrivateData, submission: UserSubmission): F[AmqpMessage[Task]] = {
+      UUIDGen[F].randomUUID
+        .map(uuid =>
+          AmqpMessage(
+            Task(
+              taskId = uuid.toString,
+              problem = problem.some,
+              userSubmission = submission.some,
+            ),
+            AmqpProperties.empty,
+          )
+        )
+
+    }
+
+    private def fetchProblem(problemId: ProblemId) = KafkaConsumer
+      .stream(consumerSettings)
+      .subscribeTo("problemsPrivate")
+      .records
+      .filter(_.record.key == problemId)
+      .map { commitable =>
+        commitable.record.value
+      }
+      .take(
+        1 // TODO: update this number
+      )
+      .compile
+      .toList
+      .map(_.head)
 
     override def submitTask(submission: UserSubmission): F[SubmitResponse] = {
       // TODO: add UUID generation
       val response: SubmitResponse = SubmitResponse("I like aboba")
-
-      val task: F[AmqpMessage[Task]] = {
-        UUIDGen[F].randomUUID
-          .map(uuid =>
-            AmqpMessage(
-              Task(
-                taskId = uuid.toString,
-                problem = Problem().some,
-                userSubmission = submission.some,
-              ),
-              AmqpProperties.empty,
-            )
-          )
-
-      }
 
       def logPipe: Pipe[F, AmqpMessage[Task], AmqpMessage[Task]] = _.evalMap { msg =>
         Async[F]
@@ -75,7 +92,8 @@ object TaskRepository {
 
       val program: F[Unit] = client.createConnectionChannel.use { implicit channel =>
         for {
-          task <- task
+          problem <- fetchProblem(submission.problemId)
+          task <- createTask(problem, submission)
           _ <- client.declareQueue(DeclarationQueueConfig.default(queueName))
           _ <- client.declareExchange(exchangeName, ExchangeType.Topic)
           _ <- client.bindQueue(queueName, exchangeName, routingKey)
