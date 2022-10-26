@@ -47,14 +47,14 @@ message UserSubmission {
   Solution solution = 3;
 }
 
-// goes to "problemPublic" topic
+// goes to "problemsPublic" topic
 message ProblemPublicData {
   string problemId = 1;
   string problemText = 2;
   double executionTimeThreshold = 3;
 }
 
-// goes to "problemPrivate" topic
+// goes to "problemsPrivate" topic
 message ProblemPrivateData {
   string problemId = 1;
   repeated string testInputs = 2;

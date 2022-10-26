@@ -8,6 +8,8 @@ import shared.Language.python
 import shared.types.ProblemId
 import shared.{Result, Solution, Success}
 
+import scala.concurrent.duration.DurationInt
+
 object Main extends IOApp.Simple {
   val run: IO[Unit] = {
 
@@ -16,9 +18,9 @@ object Main extends IOApp.Simple {
         .withBootstrapServers("localhost:9092")
 
     val produces = KafkaProducer.stream(producerSettings).flatMap { producer =>
-      Stream("L", "+ratio", "+didn't ask", "L", "L")
+      Stream("L", "+ratio", "+didn't ask", "L", "L", "GG", "GG", "GG")
         .map { taskID =>
-          val solution = Solution(code = "cringe()", language = python)
+          val solution = Solution(code = "heh()", language = python)
           val res: Result = Success(duration = 0.2d, taskId = taskID, solution = Some(solution))
           ProducerRecords
             .one(ProducerRecord("aboba", "KEKW", res))

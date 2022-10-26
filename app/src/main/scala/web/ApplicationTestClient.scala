@@ -12,7 +12,7 @@ object ApplicationTestClient extends IOApp.Simple {
 
   def managedChannelResource: Resource[IO, ManagedChannel] =
     NettyChannelBuilder
-      .forAddress("localhost", 9999)
+      .forAddress("localhost", 10000)
       .usePlaintext()
       .resource[IO]
 

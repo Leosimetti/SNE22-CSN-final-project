@@ -4,11 +4,11 @@ import dev.profunktor.fs2rabbit.interpreter.RabbitClient
 import fs2.grpc.syntax.all._
 import fs2.kafka.{AutoOffsetReset, ConsumerSettings}
 import io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder
-import kafka.ResultRepository
 import kafka.implicits._
+import kafka.{ProblemRepository, ResultRepository}
 import rabbitmq.TaskRepository
 import shared.types.ProblemId
-import shared.{AppFs2Grpc, Result}
+import shared.{AppFs2Grpc, ProblemPublicData, Result}
 import web.ApplicationServer
 
 import scala.concurrent.duration._
@@ -17,6 +17,12 @@ object Main extends IOApp {
 
   val consumerSettings: ConsumerSettings[IO, ProblemId, Result] =
     ConsumerSettings[IO, ProblemId, Result]
+      .withAutoOffsetReset(AutoOffsetReset.Earliest)
+      .withBootstrapServers("localhost:9092")
+      .withGroupId("group")
+
+  val consumerSettingsForProblems: ConsumerSettings[IO, ProblemId, ProblemPublicData] =
+    ConsumerSettings[IO, ProblemId, ProblemPublicData]
       .withAutoOffsetReset(AutoOffsetReset.Earliest)
       .withBootstrapServers("localhost:9092")
       .withGroupId("group")
@@ -39,8 +45,9 @@ object Main extends IOApp {
       rabbitClient <- RabbitClient.default[IO](rabbitSettings).resource
       submitRepo = TaskRepository[IO](rabbitClient)
       resultRepo = ResultRepository[IO](consumerSettings)
+      problemRepo = ProblemRepository[IO](consumerSettingsForProblems)
       appService <-
-        AppFs2Grpc.bindServiceResource(ApplicationServer(submitRepo, resultRepo))
+        AppFs2Grpc.bindServiceResource(ApplicationServer(problemRepo, submitRepo, resultRepo))
     } yield appService
 
     app.use(service =>
