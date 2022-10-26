@@ -3,9 +3,16 @@ syntax = "proto3";
 package shared;
 
 service App {
+  rpc getProblems(Empty) returns (GetProblemsResponse);
   rpc submit(UserSubmission) returns (SubmitResponse);
   rpc mySubmissions(MySubmissionsRequest) returns (stream MySubmissionsResponse);
   rpc myTaskSubmissions(MyTaskSubmissionsRequest) returns (stream MySubmissionsResponse);
+}
+
+message Empty {}
+
+message GetProblemsResponse {
+  repeated ProblemPublicData problems = 1;
 }
 
 message SubmitResponse {
@@ -40,16 +47,23 @@ message UserSubmission {
   Solution solution = 3;
 }
 
-message Problem {
+// goes to "problemPublic" topic
+message ProblemPublicData {
+  string problemId = 1;
+  string problemText = 2;
+  double executionTimeThreshold = 3;
+}
+
+// goes to "problemPrivate" topic
+message ProblemPrivateData {
   string problemId = 1;
   repeated string testInputs = 2;
   repeated Solution referenceSolutions = 3;
-  double executionTimeThreshold = 4;
 }
 
 message Task {
   string taskId = 1;
-  Problem problem = 2;
+  ProblemPrivateData problem = 2;
   UserSubmission userSubmission = 3;
 }
 
