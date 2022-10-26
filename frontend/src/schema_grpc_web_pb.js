@@ -77,6 +77,67 @@ proto.shared.AppPromiseClient =
 /**
  * @const
  * @type {!grpc.web.MethodDescriptor<
+ *   !proto.shared.Empty,
+ *   !proto.shared.GetProblemsResponse>}
+ */
+const methodDescriptor_App_getProblems = new grpc.web.MethodDescriptor(
+  '/shared.App/getProblems',
+  grpc.web.MethodType.UNARY,
+  proto.shared.Empty,
+  proto.shared.GetProblemsResponse,
+  /**
+   * @param {!proto.shared.Empty} request
+   * @return {!Uint8Array}
+   */
+  function(request) {
+    return request.serializeBinary();
+  },
+  proto.shared.GetProblemsResponse.deserializeBinary
+);
+
+
+/**
+ * @param {!proto.shared.Empty} request The
+ *     request proto
+ * @param {?Object<string, string>} metadata User defined
+ *     call metadata
+ * @param {function(?grpc.web.RpcError, ?proto.shared.GetProblemsResponse)}
+ *     callback The callback function(error, response)
+ * @return {!grpc.web.ClientReadableStream<!proto.shared.GetProblemsResponse>|undefined}
+ *     The XHR Node Readable Stream
+ */
+proto.shared.AppClient.prototype.getProblems =
+    function(request, metadata, callback) {
+  return this.client_.rpcCall(this.hostname_ +
+      '/shared.App/getProblems',
+      request,
+      metadata || {},
+      methodDescriptor_App_getProblems,
+      callback);
+};
+
+
+/**
+ * @param {!proto.shared.Empty} request The
+ *     request proto
+ * @param {?Object<string, string>=} metadata User defined
+ *     call metadata
+ * @return {!Promise<!proto.shared.GetProblemsResponse>}
+ *     Promise that resolves to the response
+ */
+proto.shared.AppPromiseClient.prototype.getProblems =
+    function(request, metadata) {
+  return this.client_.unaryCall(this.hostname_ +
+      '/shared.App/getProblems',
+      request,
+      metadata || {},
+      methodDescriptor_App_getProblems);
+};
+
+
+/**
+ * @const
+ * @type {!grpc.web.MethodDescriptor<
  *   !proto.shared.UserSubmission,
  *   !proto.shared.SubmitResponse>}
  */
