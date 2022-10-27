@@ -1,56 +1,53 @@
-import cats.effect.{ExitCode, IO, IOApp}
+import cats.effect.{IO, Resource, ResourceApp}
+import cats.syntax.all._
 import dev.profunktor.fs2rabbit.config.Fs2RabbitConfig
 import dev.profunktor.fs2rabbit.interpreter.RabbitClient
 import fs2.grpc.syntax.all._
-import fs2.kafka.{AutoOffsetReset, ConsumerSettings, Deserializer}
 import io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder
-import kafka.implicits._
 import kafka.{ProblemRepository, ResultRepository}
+import pureconfig.ConfigSource
 import rabbitmq.TaskRepository
-import shared.types.ProblemId
-import shared.{AppFs2Grpc, ProblemPrivateData, ProblemPublicData, Result}
+import shared.{AppFs2Grpc, Config}
 import web.ApplicationServer
 
 import scala.concurrent.duration._
 
-object Main extends IOApp {
+object Main extends ResourceApp.Simple {
 
-  def consumerSettings[T](implicit aboba: Deserializer[IO, T]): ConsumerSettings[IO, ProblemId, T] =
-    ConsumerSettings[IO, ProblemId, T]
-      .withAutoOffsetReset(AutoOffsetReset.Earliest)
-      .withBootstrapServers("localhost:9092")
-      .withGroupId("group")
-
-  val rabbitSettings: Fs2RabbitConfig = Fs2RabbitConfig(
-    host = "localhost",
-    port = 5672,
-    virtualHost = "/",
-    connectionTimeout = 3.minutes,
-    ssl = false,
-    username = Some("guest"),
-    password = Some("guest"),
-    requeueOnNack = false,
-    requeueOnReject = false,
-    internalQueueSize = Some(500),
-  )
-
-  override def run(args: List[String]): IO[ExitCode] = {
-    val app = for {
+  override def run: Resource[IO, Unit] = {
+    for {
+      config <- Resource.eval {
+        IO.delay(
+          ConfigSource.default.load[Config]
+        ).flatMap(res => IO.fromEither(res.leftMap(e => new Exception(e.prettyPrint()))))
+      }
+      rabbitSettings = Fs2RabbitConfig(
+        host = config.rabbitMq.host,
+        port = config.rabbitMq.port,
+        virtualHost = "/",
+        connectionTimeout = 3.minutes,
+        ssl = false,
+        username = config.rabbitMq.username.some,
+        password = config.rabbitMq.password.some,
+        requeueOnNack = false,
+        requeueOnReject = false,
+        internalQueueSize = Some(500),
+      )
       rabbitClient <- RabbitClient.default[IO](rabbitSettings).resource
-      resultRepo = ResultRepository[IO](consumerSettings)
-      submitRepo = TaskRepository[IO](rabbitClient, consumerSettings)
-      problemRepo = ProblemRepository[IO](consumerSettings)
+      resultRepo = ResultRepository[IO](config)
+      submitRepo = TaskRepository[IO](config, rabbitClient)
+      problemRepo = ProblemRepository[IO](config)
       appService <-
         AppFs2Grpc.bindServiceResource(ApplicationServer(problemRepo, submitRepo, resultRepo))
-    } yield appService
-
-    app.use(service =>
-      NettyServerBuilder
-        .forPort(9999)
-        .addService(service)
-        .resource[IO]
-        .evalMap(server => IO.delay(server.start()))
-        .useForever
-    )
+      _ <-
+        Resource.eval(
+          NettyServerBuilder
+            .forPort(9999)
+            .addService(appService)
+            .resource[IO]
+            .evalMap(srv => IO.delay(srv.start()))
+            .useForever
+        )
+    } yield ()
   }
 }

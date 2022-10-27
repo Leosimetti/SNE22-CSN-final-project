@@ -11,6 +11,7 @@ lazy val app = (project in file("app"))
     name := "CSN-final-project",
     scalacOptions += "-Wnonunit-statement",
     libraryDependencies ++= Seq(
+      "com.github.pureconfig" %% "pureconfig" % "0.17.1",
       "com.github.fd4s" %% "fs2-kafka" % "3.0.0-M8",
       "io.grpc" % "grpc-netty-shaded" % scalapb.compiler.Version.grpcJavaVersion,
       "org.slf4j" % "slf4j-api" % "2.0.3",

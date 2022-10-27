@@ -2,15 +2,13 @@ package kafka
 
 import cats.effect.{IO, IOApp}
 import fs2.Stream
-import fs2.kafka._
+import fs2.kafka.{KafkaProducer, ProducerRecord, ProducerRecords, ProducerSettings}
 import kafka.implicits._
 import shared.Language.python
 import shared.types.ProblemId
 import shared.{Result, Solution, Success}
 
-import scala.concurrent.duration.DurationInt
-
-object Main extends IOApp.Simple {
+object PopulateResultTopic extends IOApp.Simple {
   val run: IO[Unit] = {
 
     val producerSettings =
