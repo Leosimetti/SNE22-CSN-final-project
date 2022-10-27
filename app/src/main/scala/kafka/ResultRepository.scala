@@ -2,20 +2,18 @@ package kafka
 import cats.data.NonEmptyChain
 import cats.effect.Async
 import cats.syntax.all._
-import fs2.kafka.{CommittableConsumerRecord, ConsumerSettings, KafkaConsumer}
+import fs2.kafka.{CommittableConsumerRecord, KafkaConsumer}
 import fs2.{Chunk, Pipe, Stream}
+import kafka.implicits._
 import shared.types.{ProblemId, UserId}
-import shared.{Failure, Result, Success}
-
+import shared.{Config, Failure, Result, Success}
 trait ResultRepository[F[_]] {
   def getResults(userId: UserId): Stream[F, Result.NonEmpty]
   def getTaskResults(userId: UserId, problemId: ProblemId): Stream[F, Result.NonEmpty]
 }
 
 object ResultRepository {
-  def apply[F[_]: Async](
-      consumerSettings: ConsumerSettings[F, ProblemId, Result]
-  ): ResultRepository[F] = new ResultRepository[F] {
+  def apply[F[_]: Async](config: Config): ResultRepository[F] = new ResultRepository[F] {
 
     private def mapGroupReduceGroupsOfSize[I, K, O](
         groupSize: Int
@@ -57,15 +55,15 @@ object ResultRepository {
 
     private def recordStream(userId: UserId): Stream[F, CommittableConsumerRecord[F, ProblemId, Result]] =
       KafkaConsumer
-        .stream(consumerSettings)
+        .stream(ConsumerSettings.forProblemIdKey[F, Result](config))
         .subscribeTo(userId)
         .records
 
     private def reduceResults(results: NonEmptyChain[Result.NonEmpty]): Result.NonEmpty = {
 
       val (durationSum, isFailure) = results.foldLeft((0.0d, results.head)) {
-        case ((sum, f), Success(duration, _, _, _))        => (sum + duration, f)
-        case ((sum, _), fail: Failure) => (sum, fail)
+        case ((sum, f), Success(duration, _, _, _)) => (sum + duration, f)
+        case ((sum, _), fail: Failure)              => (sum, fail)
       }
 
       isFailure match {

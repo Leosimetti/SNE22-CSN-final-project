@@ -1,20 +1,21 @@
 package kafka
+
 import cats.effect.Async
-import fs2.kafka.{ConsumerSettings, KafkaConsumer}
-import shared.ProblemPublicData
-import shared.types.ProblemId
+import fs2.kafka.KafkaConsumer
+import kafka.implicits._
+import shared.{Config, ProblemPublicData}
 
 trait ProblemRepository[F[_]] {
   def getProblems: F[List[ProblemPublicData]]
 }
 
 object ProblemRepository {
-  def apply[F[_]: Async](consumerSettings: ConsumerSettings[F, ProblemId, ProblemPublicData]): ProblemRepository[F] =
+  def apply[F[_]: Async](config: Config): ProblemRepository[F] =
     new ProblemRepository[F] {
       override def getProblems: F[List[ProblemPublicData]] =
         KafkaConsumer
-          .stream(consumerSettings)
-          .subscribeTo("problemsPublic")
+          .stream(ConsumerSettings.forProblemIdKey[F, ProblemPublicData](config))
+          .subscribeTo(config.kafka.publicProblemsTopic)
           .records
           .map { commitable =>
             commitable.record.value
