@@ -1,4 +1,5 @@
 package web
+
 import cats.effect.{IO, IOApp, Resource}
 import fs2.Stream
 import fs2.grpc.syntax.all._

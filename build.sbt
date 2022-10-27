@@ -26,9 +26,18 @@ lazy val app = (project in file("app"))
       "org.http4s" %% "http4s-ember-server" % http4sVersion,
       "org.http4s" %% "http4s-ember-client" % http4sVersion,
     ),
+    mainClass := Some("Main")
+  )
+  .enablePlugins(Fs2Grpc)
+  .settings(
     Compile / PB.protoSources := Seq(file("protobuf")),
     scalapbCodeGeneratorOptions ++= Seq(
       CodeGeneratorOption.FlatPackage
     ),
   )
-  .enablePlugins(Fs2Grpc)
+  .enablePlugins(DockerPlugin)
+  .enablePlugins(JavaAppPackaging)
+  .settings(
+    dockerExposedPorts := Seq(9999),
+    dockerBaseImage := "eclipse-temurin:17"
+  )
