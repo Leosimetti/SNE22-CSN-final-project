@@ -60,7 +60,7 @@ services:
       - "15672:15672"
     volumes:
       - .docker/data/:/var/lib/rabbitmq/
-      - .doccker/log:/var/log/rabbitmq
+      - .docker/log:/var/log/rabbitmq
     networks:
       - cocker_net
 
