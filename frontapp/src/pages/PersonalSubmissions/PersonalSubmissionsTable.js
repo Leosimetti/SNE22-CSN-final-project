@@ -7,16 +7,15 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 
-
 function createRow(type, duration, solution) {
-    return {type, duration, solution}
+  return { type, duration, solution };
 }
 
 const rows = [
-    createRow("Success", "12min", "aboba"),
-    createRow("Success", "12min", "aboba"),
-    createRow("Failure", "12min", "aboba"),
-]
+  createRow("Success", "122min", "aboba"),
+  createRow("Success", "123min", "aboba"),
+  createRow("Failure", "12min", "aboba"),
+];
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
