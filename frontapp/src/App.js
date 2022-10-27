@@ -32,7 +32,7 @@ function App() {
           <PageContent background="white" style={{ padding: "0" }}>
             <div style={{ minHeight: "100vh" }}>
               <Header background={"brand"}>
-                <Link to="/">
+                <Link to="/" style={{ textDecoration: 'none' }}>
                   <Heading margin="20px" color="white">
                     DVBAJSfPC
                   </Heading>
