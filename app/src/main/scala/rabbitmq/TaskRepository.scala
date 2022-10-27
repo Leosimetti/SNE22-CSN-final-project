@@ -2,7 +2,7 @@ package rabbitmq
 
 import cats.data.Kleisli
 import cats.effect.Async
-import cats.effect.std.UUIDGen
+import cats.effect.std.{Console, UUIDGen}
 import cats.implicits._
 import dev.profunktor.fs2rabbit.config.declaration.DeclarationQueueConfig
 import dev.profunktor.fs2rabbit.effects.EnvelopeDecoder
@@ -22,14 +22,14 @@ trait TaskRepository[F[_]] {
 
 object TaskRepository {
 
-  def apply[F[_]: Async: UUIDGen](
+  def apply[F[_]: Async: UUIDGen: Console](
       config: Config,
       client: RabbitClient[F],
   ): TaskRepository[F] = new TaskRepository[F] {
 
-    val queueName: QueueName = QueueName("Tasks")
-    val exchangeName: ExchangeName = ExchangeName("testEX")
-    val routingKey: RoutingKey = RoutingKey("testRK")
+    val queueName: QueueName = QueueName(config.rabbitMq.taskQueueName)
+    val exchangeName: ExchangeName = ExchangeName(config.rabbitMq.taskExchangeName)
+    val routingKey: RoutingKey = RoutingKey(config.rabbitMq.taskRoutingKey)
     implicit val messageEncoder: Kleisli[F, AmqpMessage[Array[Byte]], AmqpMessage[Array[Byte]]] =
       Kleisli(s => s.pure[F])
     implicit val messageDecoder: EnvelopeDecoder[F, Array[Byte]] =

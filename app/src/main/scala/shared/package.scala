@@ -29,6 +29,9 @@ case class RabbitMqConfig(
     port: Int,
     username: String,
     password: String,
+    taskQueueName: String,
+    taskExchangeName: String,
+    taskRoutingKey: String,
 )
 
 object RabbitMqConfig {
