@@ -4,3 +4,4 @@
 project/project/**
 .docker
 .vscode
+**/__pycache__/**
