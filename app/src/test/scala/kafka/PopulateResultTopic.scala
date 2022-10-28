@@ -9,11 +9,12 @@ import shared.types.ProblemId
 import shared.{Result, Solution, Success}
 
 object PopulateResultTopic extends IOApp.Simple {
-  val run: IO[Unit] = {
 
-    val producerSettings =
-      ProducerSettings[IO, ProblemId, Result]
-        .withBootstrapServers("localhost:9092")
+  val producerSettings: ProducerSettings[IO, ProblemId, Result] =
+    ProducerSettings[IO, ProblemId, Result]
+      .withBootstrapServers("localhost:9092")
+
+  val run: IO[Unit] = {
 
     val produces = KafkaProducer.stream(producerSettings).flatMap { producer =>
       Stream("L", "+ratio", "+didn't ask", "L", "L", "GG", "GG", "GG")
