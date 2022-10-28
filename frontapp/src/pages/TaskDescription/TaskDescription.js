@@ -30,11 +30,12 @@ export default function TaskDescription() {
         Output one integer, the number of cakes Mel can finish.
       </Paragraph>
       <Heading>Example</Heading>
+
       <div className="exampleContainer">
         <div className="exampleEntryCardWrapper inputWrapper">
           <Card pad="small" gap="small" style={{ padding: "0px" }}>
             <CardHeader background="brandLight">
-              <div style={{ margin: "14px 0 14px 14px" }}>Output</div>
+              <div style={{ margin: "14px 0 14px 14px" }}>Input</div>
             </CardHeader>
             <CardBody>
               <div style={{ margin: "0 0 14px 14px" }}>
@@ -43,13 +44,14 @@ export default function TaskDescription() {
             </CardBody>
           </Card>
         </div>
+
         <div className="exampleEntryCardWrapper">
           <Card pad="small" gap="small" style={{ padding: "0px" }}>
             <CardHeader background="brandLight">
               <div style={{ margin: "14px 0 14px 14px" }}>Output</div>
             </CardHeader>
             <CardBody>
-              <div style={{ margin: "0 0 14px 14px" }}>Output</div>
+              <div style={{ margin: "0 0 14px 14px" }}>123</div>
             </CardBody>
           </Card>
         </div>

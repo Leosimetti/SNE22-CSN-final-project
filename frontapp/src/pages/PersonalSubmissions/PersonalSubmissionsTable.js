@@ -7,8 +7,8 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 
-function createRow(type, duration, solution) {
-  return { type, duration, solution };
+function createRow(result, duration, solution) {
+  return { result, duration, solution };
 }
 
 const rows = [
@@ -44,7 +44,7 @@ export default function PersonalSubmissionsTable() {
       <Table sx={{ minWidth: 650 }} aria-label="simple table">
         <TableHead>
           <StyledTableRow>
-            <StyledTableCell align="left">Type</StyledTableCell>
+            <StyledTableCell align="left">Result</StyledTableCell>
             <StyledTableCell align="left">Duration</StyledTableCell>
             <StyledTableCell align="left">View solution</StyledTableCell>
           </StyledTableRow>
@@ -56,7 +56,7 @@ export default function PersonalSubmissionsTable() {
               sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
             >
               <StyledTableCell component="th" scope="row">
-                {row.type}
+                {row.result}
               </StyledTableCell>
               <StyledTableCell align="left">{row.duration}</StyledTableCell>
               <StyledTableCell align="left">{row.solution}</StyledTableCell>

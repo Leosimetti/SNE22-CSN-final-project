@@ -1,57 +1,39 @@
 import "./TaskSubmit.css";
 
 import CodeEditor from "@uiw/react-textarea-code-editor";
-import { Button , Form,Heading , Paragraph , Select  } from "grommet";
-import { useRef, useState } from "react";
+import { Button, Form, Heading, Paragraph, Select } from "grommet";
+import { useContext, useRef, useState } from "react";
 
 import ContestNav from "../../common/ContestNav";
-import { APPLICATION_SERVER } from "../../common/URLs";
-
-function toTitleCase(str) {
-  return str.replace(/\w\S*/g, function (txt) {
-    return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-  });
-}
+import ProtoContext from "../../common/ProtoContext";
+import { PL_OPTIONS, TASK_OPTIONS } from "./TaskSubmitHelper.js";
 
 export default function TaskSubmit() {
-  const TASK_OPTIONS = [
-    "A-Josko posrat",
-    "B-Jidko nasrat",
-    "C-Silno obosratsa",
-  ];
-  const PL_OPTIONS = ["cpp", "python", "scala", "java"];
-
   const [task, setTask] = useState("");
   const [language, setLanguage] = useState("");
+  const proto = useContext(ProtoContext);
 
   const codeRef = useRef();
 
   async function onSubmit() {
-    // const PROBLEM_ID = "1";
-    const USER_ID = "1";
+    const [shared, client] = [proto.shared, proto.client];
 
-    const data = {
-      problemId: task,
-      userId: USER_ID,
-      solution: {
-        language: toTitleCase(language),
-        code: codeRef.current.value,
-      },
-    };
+    const userSubmission = new shared.UserSubmission();
+    const solution = new shared.Solution();
 
-    console.log(data);
+    solution.setCode(codeRef.current.value);
+    solution.setLanguage(shared.Language.PYTHON);
+    // console.log(solution)
+    userSubmission.setProblemid("a+b");
+    userSubmission.setUserid("aboba");
+    userSubmission.setSolution(solution);
 
-    const response = await fetch(APPLICATION_SERVER, {
-      method: "POST",
-      mode: "no-cors", //TODO: CORS
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    }).catch((err) => console.log(err));
-    const responseJSON = await response.text();
-
-    console.log(responseJSON);
+    // use the client to send our pingrequest, the function that is passed
+    // as the third param is a callback.
+    client.submit(userSubmission, null, function (err, response) {
+      console.log(response);
+      console.log(err);
+    });
   }
 
   return (

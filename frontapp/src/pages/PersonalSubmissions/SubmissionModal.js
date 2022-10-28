@@ -1,21 +1,16 @@
 import CodeEditor from "@uiw/react-textarea-code-editor";
 import { Box, Button, Layer } from "grommet";
 import { Close } from "grommet-icons";
-import { useEffect } from "react";
 
 export default function SubmissionModal({ show, code, onClose, language }) {
-  useEffect(() => {
-    console.log(code);
-  });
-
-  language ??= "python"
+  language ??= "python";
   return (
     <>
       {show && (
         <Layer onEsc={() => onClose()} onClickOutside={() => onClose()}>
           <Box pad="medium" animation={{ type: "fadeIn", duration: 700 }}>
             <Button icon={<Close />} onClick={onClose} />
-            <div data-color-mode="light" style={{padding: "10px 0 10px 0"}}>
+            <div data-color-mode="light" style={{ padding: "10px 0 10px 0" }}>
               <CodeEditor
                 value={code}
                 language={language}

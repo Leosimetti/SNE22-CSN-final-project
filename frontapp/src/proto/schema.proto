@@ -1,0 +1,96 @@
+syntax = "proto3";
+
+package shared;
+
+service App {
+  rpc getProblems(Empty) returns (GetProblemsResponse);
+  rpc submit(UserSubmission) returns (SubmitResponse);
+  rpc mySubmissions(MySubmissionsRequest) returns (stream MySubmissionsResponse);
+  rpc myTaskSubmissions(MyTaskSubmissionsRequest) returns (stream MySubmissionsResponse);
+}
+
+message Empty {}
+
+message GetProblemsResponse {
+  repeated ProblemPublicData problems = 1;
+}
+
+message SubmitResponse {
+  string status = 1;
+}
+
+message MySubmissionsRequest {
+  string userId = 2;
+}
+
+message MyTaskSubmissionsRequest {
+  string problemId = 1;
+  string userId = 2;
+}
+
+message MySubmissionsResponse {
+  Result result = 1;
+}
+
+enum Language {
+  python = 0;
+}
+
+message Solution {
+  string code = 1;
+  Language language = 2;
+}
+
+message UserSubmission {
+  string problemId = 1;
+  string userId = 2;
+  Solution solution = 3;
+}
+
+// goes to "problemsPublic" topic
+message ProblemPublicData {
+  string problemId = 1;
+  string problemText = 2;
+  double executionTimeThreshold = 3;
+}
+
+// goes to "problemsPrivate" topic
+message ProblemPrivateData {
+  string problemId = 1;
+  repeated string testInputs = 2;
+  repeated Solution referenceSolutions = 3;
+}
+
+message Task {
+  string taskId = 1;
+  ProblemPrivateData problem = 2;
+  UserSubmission userSubmission = 3;
+}
+
+// BEGIN Result definition
+
+/*
+In Kafka we use:
+  - userId (string) as a topic name
+  - problemId (string) as a key
+  - result (Result) as a value
+ */
+message Result {
+  oneof sealed_value {
+    Success success = 1;
+    Failure failure = 2;
+  }
+}
+
+message Success {
+  double duration = 1;
+  Solution solution = 2;
+  string taskId = 3;
+}
+
+message Failure {
+  double duration = 1;
+  Solution solution = 2;
+  string taskId = 3;
+}
+// END Result definition
