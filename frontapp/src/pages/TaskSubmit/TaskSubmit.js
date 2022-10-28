@@ -2,7 +2,7 @@ import "./TaskSubmit.css";
 
 import CodeEditor from "@uiw/react-textarea-code-editor";
 import { Button, Form, Heading, Paragraph, Select } from "grommet";
-import { useContext, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 
 import ContestNav from "../../common/ContestNav";
 import ProtoContext from "../../common/ProtoContext";
@@ -11,13 +11,16 @@ import { PL_OPTIONS } from "./TaskSubmitHelper.js";
 
 export default function TaskSubmit() {
   const [task, setTask] = useState("");
-  const [language, setLanguage] = useState("");
+  const [language, setLanguage] = useState("python");
   const proto = useContext(ProtoContext);
   const [problems] = useLocalStorage("Problems", []);
-
   const codeRef = useRef();
-
+  
   async function onSubmit() {
+    if (!task) {
+      alert("You forgot to choose task")
+      return
+    }
     const [shared, client] = [proto.shared, proto.client];
 
     const userSubmission = new shared.UserSubmission();
@@ -35,6 +38,12 @@ export default function TaskSubmit() {
       console.log(err);
     });
   }
+
+  useEffect(()=>{
+    if (codeRef) {
+      codeRef.current.setAttribute("required", "")
+    }
+  }, [codeRef.current])
 
   return (
     <>
