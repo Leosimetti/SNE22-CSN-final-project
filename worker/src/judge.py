@@ -1,4 +1,4 @@
-import protoc_build.schema_pb2 as schema
+import schema_pb2 as schema
 
 
 def judge(task):

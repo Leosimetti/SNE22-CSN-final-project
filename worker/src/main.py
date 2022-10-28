@@ -8,7 +8,7 @@ import kafka.errors
 import argparse
 import time
 from judge import judge
-import protoc_build.schema_pb2 as schema
+import schema_pb2 as schema
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
