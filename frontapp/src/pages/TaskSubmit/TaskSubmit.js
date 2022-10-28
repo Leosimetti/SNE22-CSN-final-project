@@ -40,7 +40,7 @@ export default function TaskSubmit() {
     <>
       <ContestNav />
 
-      <Heading>Contest name: ABOBA</Heading>
+      <Heading>Contest name: Cup of the year</Heading>
 
       <Form onSubmit={() => onSubmit()}>
         <div className="selectFormFieldContainer">
