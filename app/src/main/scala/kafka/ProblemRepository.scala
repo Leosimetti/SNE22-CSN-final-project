@@ -21,7 +21,7 @@ object ProblemRepository {
             commitable.record.value
           }
           .take(
-            1 // TODO: update this number
+            3 // TODO: update this number
           )
           .compile
           .toList
