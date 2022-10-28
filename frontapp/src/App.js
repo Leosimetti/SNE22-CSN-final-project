@@ -9,7 +9,6 @@ import PersonalSubmissions from "./pages/PersonalSubmissions/PersonalSubmissions
 import TaskDescription from "./pages/TaskDescription/TaskDescription";
 import Tasks from "./pages/Tasks/Tasks";
 import TaskSubmit from "./pages/TaskSubmit/TaskSubmit";
-
 const theme = {
   global: {
     colors: {
@@ -29,6 +28,7 @@ const theme = {
 
 
 function App() {
+
   return (
     <Grommet theme={theme}>
       <ProtoContext.Provider value={PROTO_INFO}>

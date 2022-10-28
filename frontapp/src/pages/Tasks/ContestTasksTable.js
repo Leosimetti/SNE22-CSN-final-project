@@ -35,7 +35,7 @@ export default function ContestTaskTable({ rows }) {
         <TableHead>
           <StyledTableRow>
             <StyledTableCell align="left">Name</StyledTableCell>
-            <StyledTableCell align="left">Status</StyledTableCell>
+            <StyledTableCell align="left">Available at</StyledTableCell>
             <StyledTableCell align="left">Solved</StyledTableCell>
             <StyledTableCell align="left">Action</StyledTableCell>
           </StyledTableRow>

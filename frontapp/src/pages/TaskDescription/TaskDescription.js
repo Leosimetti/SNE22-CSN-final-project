@@ -3,12 +3,18 @@ import "./TaskDescription.css";
 import { Card, CardBody, CardHeader, Heading, Paragraph } from "grommet";
 
 import ContestNav from "../../common/ContestNav";
+import useLocalStorage from "../../common/useLocalStorage";
+import useQuery from "../../common/useQuery";
 
 export default function TaskDescription() {
+  const query = useQuery();
+  const [problems] = useLocalStorage("Problems", []);
+  const problem = problems.filter((el) => el.name === query.get("name"))[0];
+  console.log(problem)
   return (
     <>
       <ContestNav />
-      <Heading style={{ lineHeight: "20px" }}>Taskname</Heading>
+      <Heading style={{ lineHeight: "20px" }}>{problem.name}</Heading>
       <Paragraph responsive style={{ maxWidth: "100%" }} size="xlarge">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
         tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim

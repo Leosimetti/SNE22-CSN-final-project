@@ -6,12 +6,14 @@ import { useContext, useRef, useState } from "react";
 
 import ContestNav from "../../common/ContestNav";
 import ProtoContext from "../../common/ProtoContext";
-import { PL_OPTIONS, TASK_OPTIONS } from "./TaskSubmitHelper.js";
+import useLocalStorage from "../../common/useLocalStorage";
+import { PL_OPTIONS } from "./TaskSubmitHelper.js";
 
 export default function TaskSubmit() {
   const [task, setTask] = useState("");
   const [language, setLanguage] = useState("");
   const proto = useContext(ProtoContext);
+  const [problems] = useLocalStorage("Problems", []);
 
   const codeRef = useRef();
 
@@ -23,13 +25,11 @@ export default function TaskSubmit() {
 
     solution.setCode(codeRef.current.value);
     solution.setLanguage(shared.Language.PYTHON);
-    // console.log(solution)
-    userSubmission.setProblemid("a+b");
+
+    userSubmission.setProblemid(task);
     userSubmission.setUserid("aboba");
     userSubmission.setSolution(solution);
 
-    // use the client to send our pingrequest, the function that is passed
-    // as the third param is a callback.
     client.submit(userSubmission, null, function (err, response) {
       console.log(response);
       console.log(err);
@@ -59,7 +59,7 @@ export default function TaskSubmit() {
             name="select_task"
             placeholder="Select task"
             value={task}
-            options={TASK_OPTIONS}
+            options={problems.map((el)=>el.name)}
             onChange={({ option }) => setTask(option)}
             style={{ width: "300px" }}
           />
