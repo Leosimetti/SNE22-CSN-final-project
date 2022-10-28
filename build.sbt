@@ -17,14 +17,6 @@ lazy val app = (project in file("app"))
       "org.slf4j" % "slf4j-api" % "2.0.3",
       "ch.qos.logback" % "logback-classic" % "1.4.4" % Runtime,
       "dev.profunktor" %% "fs2-rabbit" % rabbitMqVersion,
-      "dev.profunktor" %% "fs2-rabbit-circe" % rabbitMqVersion,
-      "io.circe" %% "circe-generic" % "0.14.3",
-      "org.latestbit" %% "circe-tagged-adt-codec" % "0.10.0",
-      "com.softwaremill.sttp.tapir" %% "tapir-core" % tapirVersion,
-      "com.softwaremill.sttp.tapir" %% "tapir-http4s-server" % tapirVersion,
-      "com.softwaremill.sttp.tapir" %% "tapir-json-circe" % tapirVersion,
-      "org.http4s" %% "http4s-ember-server" % http4sVersion,
-      "org.http4s" %% "http4s-ember-client" % http4sVersion,
     ),
     mainClass := Some("Main")
   )

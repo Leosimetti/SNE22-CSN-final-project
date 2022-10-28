@@ -142,14 +142,14 @@ object PopulateProblemTopic extends IOApp.Simple {
     val pub = dumpIntoKafka[ProblemId, ProblemPublicData](
       problemDescriptions,
       _.problemId,
-      ProducerSettings.forProblemIdKey("172.29.104.5", 9092),
+      ProducerSettings.forProblemIdKey("172.29.86.80", 9092),
       "problemsPublic",
     )
 
     val priv = dumpIntoKafka[ProblemId, ProblemPrivateData](
       problemTests,
       _.problemId,
-      ProducerSettings.forProblemIdKey("172.29.104.5", 9092),
+      ProducerSettings.forProblemIdKey("172.29.86.80", 9092),
       "problemsPrivate",
     )
 

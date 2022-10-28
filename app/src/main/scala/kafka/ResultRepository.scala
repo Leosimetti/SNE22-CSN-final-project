@@ -27,23 +27,25 @@ object ResultRepository {
           state: State,
           results: Chunk[O] = Chunk.empty[O],
       ): (State, Chunk[O]) = {
-        val maybeHead = remaining.head
-        if (maybeHead.isEmpty)
-          (state, results)
-        else {
-          val head = maybeHead.get
-          val tail = remaining.drop(1)
-          val updatedKey = fk(head)
-          val updatedState = state.updatedWith(updatedKey) {
-            case Some(results) => Some(results.append(head))
-            case None          => Some(NonEmptyChain.one(head))
-          }
-          val updatedValue = updatedState(updatedKey)
+        remaining.head match {
+          case None => (state, results)
+          case Some(head) =>
+            val tail = remaining.drop(1)
+            val updatedKey = fk(head)
+            val updatedState = state.updatedWith(updatedKey) {
+              case Some(results) => Some(results.append(head))
+              case None          => Some(NonEmptyChain.one(head))
+            }
+            val updatedValue = updatedState(updatedKey)
 
-          if (updatedValue.length == groupSize) {
-            loop(tail, updatedState.removed(updatedKey), results ++ Chunk(collapse(updatedValue)))
-          } else
-            loop(tail, updatedState, results)
+            if (updatedValue.length == groupSize) {
+              loop(
+                tail,
+                updatedState.removed(updatedKey),
+                results ++ Chunk(collapse(updatedValue)),
+              )
+            } else
+              loop(tail, updatedState, results)
         }
       }
 
