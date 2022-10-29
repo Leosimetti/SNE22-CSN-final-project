@@ -7,16 +7,6 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 
-function createRow(result, duration, solution) {
-  return { result, duration, solution };
-}
-
-const rows = [
-  createRow("Success", "122min", "aboba"),
-  createRow("Success", "123min", "aboba"),
-  createRow("Failure", "12min", "aboba"),
-];
-
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
     backgroundColor: "#FE8E4E",
@@ -38,7 +28,8 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   },
 }));
 
-export default function PersonalSubmissionsTable() {
+export default function PersonalSubmissionsTable({rows}) {
+  console.log(rows)
   return (
     <TableContainer component={Paper}>
       <Table sx={{ minWidth: 650 }} aria-label="simple table">

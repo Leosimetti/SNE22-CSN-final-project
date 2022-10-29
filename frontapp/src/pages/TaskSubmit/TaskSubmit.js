@@ -18,7 +18,7 @@ export default function TaskSubmit() {
   
   async function onSubmit() {
     if (!task) {
-      alert("You forgot to choose task")
+      alert("You forgot to choose task.")
       return
     }
     const [shared, client] = [proto.shared, proto.client];

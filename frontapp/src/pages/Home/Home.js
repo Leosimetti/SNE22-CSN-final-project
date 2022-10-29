@@ -13,7 +13,7 @@ const rows1 = [
   createData(
     "Contest name: Cup of the year",
     <>
-      1.1.2022
+      01.01.2022
     </>,
     "1 year",
     <Link to="/tasks">Go to tasks</Link>
@@ -25,7 +25,7 @@ const rows2 = [
   createData(
     "Contest name: Cup of the previous year",
     <>
-      1.1.2021
+      01.01.2021
     </>,
     "1 year",
     <Link to="/tasks">Go to tasks</Link>
