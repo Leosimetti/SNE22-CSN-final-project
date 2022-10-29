@@ -1,0 +1,18 @@
+.selectFormFieldContainer {
+    display: flex;
+    align-items: center;
+    width: 45%;
+    justify-content: space-between;
+}
+
+.selectFormFieldName {
+    margin: 0 20px 0 0;
+}
+
+.codeEditorContainer {
+    width: 80%;
+}
+
+.submitButton {
+    margin: 20px 0;
+}
