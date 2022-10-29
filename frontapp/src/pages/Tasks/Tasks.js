@@ -13,12 +13,18 @@ function createData(name) {
     name,
     status: (
       <>
-        10.10.2022: <br /> 10.10.2023
+        01.01.2022: <br /> 01.01.2023
       </>
     ),
     solved: "0",
     action: (
-      <Link to={URLs.taskDescription + "?name=" + name}>{"Check task"}</Link>
+      <Link
+        to={
+          URLs.taskDescription + "?" + (new URLSearchParams({ name }).toString())
+        }
+      >
+        {"Check task"}
+      </Link>
     ),
   };
 }
@@ -47,9 +53,16 @@ export default function Tasks() {
             problemIds.add(problemdata[0]);
           }
           rows = [...problemIds].map((el) => createData(el));
+          console.log(problems[0].getExamplesList()[0]);
           LSsetProblems(
             problems.map((el) => {
-              return { name: el.array[0], description: el.array[1] };
+              return {
+                name: el.getProblemid(),
+                description: el.getProblemtext(),
+                examples: el.getExamplesList().map((el) => el.array),
+                inputDescription: el.getInputdescription(),
+                outputDescription: el.getOutputdescription(),
+              };
             })
           );
           setProblems([...rows]);

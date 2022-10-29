@@ -1,5 +1,6 @@
 .exampleContainer {
     display: flex;
+    white-space: "pre-wrap";
 }
 
 .exampleEntryCardWrapper {

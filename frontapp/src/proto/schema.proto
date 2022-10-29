@@ -47,17 +47,25 @@ message UserSubmission {
   Solution solution = 3;
 }
 
+message TestData {
+  string input = 1;
+  string output = 2;
+}
+
 // goes to "problemsPublic" topic
 message ProblemPublicData {
   string problemId = 1;
   string problemText = 2;
   double executionTimeThreshold = 3;
+  repeated TestData examples = 4;
+  string inputDescription = 5;
+  string outputDescription = 6;
 }
 
 // goes to "problemsPrivate" topic
 message ProblemPrivateData {
   string problemId = 1;
-  repeated string testInputs = 2;
+  repeated TestData testInputs = 2;
   repeated Solution referenceSolutions = 3;
 }
 
