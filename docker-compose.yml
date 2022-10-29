@@ -64,6 +64,21 @@ services:
     networks:
       - cocker_net
 
+  app-server:
+    image: csn-final-project:0.1.0-SNAPSHOT
+    container_name: "app"
+    ports:
+      - "9999:9999"
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - KAFKA_HOST=kafka
+    depends_on:
+      - kafka
+      - rabbitmq
+    networks:
+      - cocker_net
+
+
 volumes:
   zookeeper_data:
     driver: local
